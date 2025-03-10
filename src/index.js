@@ -35,7 +35,7 @@ import ModelUpdateVoucher from "./components/admin/Content/discount/voucher/Mode
 import ModelDetailVoucher from "./components/admin/Content/discount/voucher/ModelDetailVoucher";
 import ManageCategory from "./components/admin/Content/product/category/ManageCategory";
 
-import ManageShoe from "./components/admin/Content/product/products/ManageShoe";
+import ManageProduct from "./components/admin/Content/product/products/ManageProduct";
 import ModelCreateProduct from "./components/admin/Content/product/products/createProduct/ModelCreateProduct";
 import ModelDetailProduct from "./components/admin/Content/product/products/detailProduct/ModelDetailProduct";
 import ModelUpdateProduct from "./components/admin/Content/product/products/updateProduct/ModelUpdateProduct";
@@ -114,7 +114,7 @@ root.render(
             />
             <Route path="manage-category" element={<ManageCategory />} />
 
-            <Route path="manage-shoe" element={<ManageShoe />} />
+            <Route path="manage-shoe" element={<ManageProduct />} />
             <Route
               path="manage-create-shoe"
               element={<ModelCreateProduct />}

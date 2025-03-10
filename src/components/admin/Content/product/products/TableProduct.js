@@ -4,11 +4,12 @@ import Button from 'react-bootstrap/Button';
 import Pagination from 'react-bootstrap/Pagination';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from 'react-redux';
-import './TableShoe.scss';
+import './TableProduct.scss';
 import { IoIosEye, IoMdAdd } from "react-icons/io";
 import { updateStatusProductById } from '../../../../../redux/action/productAction'
 import { Link } from 'react-router-dom';
 import { FaPenToSquare } from "react-icons/fa6";
+import ListImageProduct from '../../../../../image/ListImageProduct';
 const NotFoundData = '/NotFoundData.png';
 const TableShoe = ({ currentPage, setCurrentPage }) => {
     const dispatch = useDispatch();
@@ -60,7 +61,7 @@ const TableShoe = ({ currentPage, setCurrentPage }) => {
                         <th>STT</th>
                         <th>Tên sản phẩm</th>
                         <th>Số lượng</th>
-                        <th>Thương hiệu</th>
+                        <th>Đơn vị gốc</th>
                         <th>Danh mục</th>
                         <th>Ảnh</th>
                         <th>Trạng thái</th>
@@ -73,22 +74,15 @@ const TableShoe = ({ currentPage, setCurrentPage }) => {
                             <tr key={`table-product-${item.id}`}>
                                 <td>{index + 1 + (currentPage - 1) * 5}</td>
                                 <td>{item.name}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.nameBrand}</td>
+                                <td>{item.quantity} {item.baseUnit}</td>
+                                <td>{item.baseUnit}</td>
                                 <td>{item.nameCategory}</td>
                                 <td>
-                                    {item?.imageByte ? (
-                                        <img
-                                            src={`data:image/jpeg;base64,${item?.imageByte}`}
-                                            alt="Product"
-                                            style={{ maxWidth: '150px', maxHeight: '150px' }}
-                                            onError={(e) => {
-                                                e.target.src = "https://placehold.co/150x150"; // Đổi nguồn ảnh khi lỗi
-                                            }}
-                                        />
-                                    ) : (
-                                        <img src={`https://placehold.co/150x150`} alt="" style={{ maxWidth: '150px', maxHeight: '150px' }} />
-                                    )}
+                                    <ListImageProduct
+                                        id={item.id}
+                                        style={{ maxWidth: '50%', height: 'auto' }}
+                                        maxHeight="1000px"
+                                    />
                                 </td>
                                 <td>
                                     <div className="form-check form-switch">
@@ -110,7 +104,7 @@ const TableShoe = ({ currentPage, setCurrentPage }) => {
                                             </Button>
                                         </Link>
                                         <Link to={`/admins/manage-update-shoe?idProduct=${item.id}`} className="mx-2">
-                                            <Button   variant="success">
+                                            <Button variant="success">
                                                 <FaPenToSquare />
                                             </Button>
                                         </Link>

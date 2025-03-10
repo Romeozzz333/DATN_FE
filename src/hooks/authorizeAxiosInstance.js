@@ -1,18 +1,14 @@
 import axios from "axios";
 import { toast } from 'react-toastify';
 import swal from 'sweetalert';
-// import { useStore } from "@/store/hooks";
-
-
-
 
 let authorizeAxiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api/v1'
+  baseURL: 'http://localhost:8080/api/v1',
+  timeout: 1000 * 60 * 10, // 10 phút
+  withCredentials: true,
 });
 
-authorizeAxiosInstance.defaults.timeout = 1000 * 60 * 10;
-authorizeAxiosInstance.defaults.withCredentials = true;
-
+// Interceptor cho request
 authorizeAxiosInstance.interceptors.request.use(
   function (config) {
     if (typeof window !== 'undefined') {
@@ -28,12 +24,12 @@ authorizeAxiosInstance.interceptors.request.use(
   }
 );
 
-// Add a response interceptor
+// Interceptor cho response
 authorizeAxiosInstance.interceptors.response.use(
   function (response) {
     return response;
   },
-  function (error) {
+  async function (error) {
     if (error.response) {
       const statusCode = error.response.status;
       const errorData = error.response.data;
@@ -42,11 +38,15 @@ authorizeAxiosInstance.interceptors.response.use(
         case 401: {
           const mess = errorData?.mess || "Phiên đăng nhập đã hết hạn!";
           toast.error(mess);
-          const accessToken = localStorage.getItem("accessToken");
-          if (accessToken) {
-            localStorage.removeItem("accessToken");
+
+          // Xóa token ngay lập tức
+          localStorage.removeItem("accessToken");
+
+          // Chuyển hướng đến trang login
+          setTimeout(() => {
             window.location.href = "/login";
-          }
+          }, 1000); // Đợi 1 giây để người dùng thấy thông báo
+
           break;
         }
         case 403:
@@ -56,10 +56,9 @@ authorizeAxiosInstance.interceptors.response.use(
           toast.error("Không tìm thấy tài nguyên!");
           break;
         case 400: {
-          // Xử lý lỗi 400 (Validation)
           if (Array.isArray(errorData)) {
             errorData.forEach(err => {
-              toast.error(err); // Hiển thị từng lỗi trong mảng
+              toast.error(err);
             });
           } else {
             toast.error("Đã xảy ra lỗi xác thực. Vui lòng kiểm tra lại.");
@@ -71,7 +70,7 @@ authorizeAxiosInstance.interceptors.response.use(
           toast.error(mess);
           break;
         }
-        case 423: // Tài khoản bị khóa
+        case 423:
           swal({
             title: "Tài khoản bị khóa",
             text: errorData.mess || "Tài khoản của bạn đã bị khóa.",
@@ -86,7 +85,6 @@ authorizeAxiosInstance.interceptors.response.use(
               }
             }
           }).then(() => {
-            // Chuyển hướng sau khi người dùng bấm OK
             window.location.href = "/logout";
           });
           break;
@@ -97,10 +95,8 @@ authorizeAxiosInstance.interceptors.response.use(
           toast.error(errorData?.error || "Đã xảy ra lỗi hệ thống!");
       }
     } else if (error.request) {
-      // Lỗi do không nhận được phản hồi từ server
       toast.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.");
     } else {
-      // Lỗi khác (cấu hình, v.v.)
       toast.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
     }
     return Promise.reject(error);
