@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Container, Row, Col } from 'react-bootstrap';
+import { Form, Container, Row, Col, Button } from 'react-bootstrap';
 import uploadFile from './pngegg.png'
 import { useSelector, useDispatch } from 'react-redux';
-import { toast } from "react-toastify";
 import { fetchAllCategoryActive } from '../../../../../../redux/action/categoryAction';
 
-const InfoProduct = ({ formErrors, setFormErrors }) => {
+const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSubmitCreate }) => {
     const dispatch = useDispatch();
-    const [product, setProduct] = useState({
-        name: '',
-        pricePerBaseUnit: '',
-        quantity: '',
-        baseUnit: '',
-        idCategory: '',
-        listImages: []
-    });
     const [listImage, setListImage] = useState({
         previewImages: []
     });
+    const resetForm = () => {
+        setProduct({
+            name: '',
+            pricePerBaseUnit: '',
+            quantity: '',
+            baseUnit: '',
+            idCategory: '',
+            listImages: []
+        });
+
+        setListImage({
+            previewImages: []
+        });
+    };
+
     const categorys = useSelector((state) => state.category.listCategory);
 
     useEffect(() => {
@@ -379,6 +385,12 @@ const InfoProduct = ({ formErrors, setFormErrors }) => {
                             <p className='p-3'>Kéo thả file hoặc nhấn vào đây để upload</p>
                         </>
                     )}
+                </Col>
+            </Row>
+            <Row className='m-4 text-end'>
+                <Col>
+                    <Button className='mx-3' variant="success" onClick={() => resetForm()}>Reset Form</Button>
+                    <Button className='mx-3' variant="primary" onClick={() => handleSubmitCreate()}>Tạo sản phẩm mới</Button>
                 </Col>
             </Row>
         </Container>

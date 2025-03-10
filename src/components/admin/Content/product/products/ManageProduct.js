@@ -1,10 +1,9 @@
 import { IoIosAddCircleOutline } from "react-icons/io";
 import Button from 'react-bootstrap/Button';
 import { useState, useEffect } from 'react';
-import TableShoe from './TableShoe';
+import TableProduct from './TableProduct';
 import { Link } from 'react-router-dom';
-import './ManageShoe.scss';
-import { toast } from 'react-toastify';
+import './ManageProduct.scss';
 
 import { useDebounce } from 'use-debounce';
 import { useSelector, useDispatch } from 'react-redux';
@@ -126,7 +125,7 @@ const ManageShoe = () => {
                                 </div>
                             </div>
                             <div className='shoe-content-body mt-3'>
-                                <TableShoe currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                <TableProduct currentPage={currentPage} setCurrentPage={setCurrentPage} />
                             </div>
                         </div>
                     </div>
