@@ -10,7 +10,6 @@ import { fetchProductDetailActive } from '../../../../redux/action/productDetail
 import { BsCheck } from "react-icons/bs";
 import { toast } from 'react-toastify';
 import ListImageProduct from '../../../../image/ListImageProduct'
-import ImageProduct from '../../../../image/ImageProduct'
 import { addToCartLocal } from '../../../managerCartLocal/CartManager'
 
 function ProductDetail() {
@@ -132,19 +131,11 @@ function ProductDetail() {
       <div className="grid p-5">
         <div className="row">
           <div className="col-md-6" style={{ overflow: 'hidden' }}>
-            {selectedProduct && selectedProduct.idProductDetail ? (
-              <ListImageProduct
-                id={selectedProduct.idProductDetail}
-                style={{ maxWidth: '100%', height: 'auto' }}
-                maxHeight="1000px"
-              />
-            ) : (
-              <ImageProduct
-                id={idProduct}
-                style={{ maxWidth: '100%', height: 'auto' }}
-                maxHeight="700px"
-              />
-            )}
+            <ListImageProduct
+              id={selectedProduct.idProductDetail}
+              style={{ maxWidth: '100%', height: 'auto' }}
+              maxHeight="1000px"
+            />
           </div>
 
           <div className="product-detail__information col-md-6">

@@ -53,7 +53,7 @@ authorizeAxiosInstance.interceptors.response.use(
           window.location.href = "/Page403";
           break;
         case 404:
-          // toast.error("Không tìm thấy tài nguyên!");
+          toast.error("Không tìm thấy tài nguyên!");
           break;
         case 400: {
           // Xử lý lỗi 400 (Validation)

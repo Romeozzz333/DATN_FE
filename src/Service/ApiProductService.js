@@ -30,10 +30,6 @@ export const findByStatusActiveFromProduct = async (filters = {}) => {
     const response = await authorizeAxiosInstance.get(`/product/list-product?${params.toString()}`);
     return response;
 };
-const findImageByIdProduct = async (id) => {
-    const response = await authorizeAxiosInstance.get(`/product/productImage?idProduct=${id}`)
-    return response;
-};
 
 const findByName = async (searchName) => {
     const response = await authorizeAxiosInstance.get(`/product/list-product?name=${searchName}`)
@@ -62,7 +58,12 @@ const findProductPriceRangePromotion = async (idProduct) => {
     const response = await authorizeAxiosInstance.get(`/product/findProductPriceRangePromotion?idProduct=${idProduct}`)
     return response;
 }
+const getAllPriceRangePromotion = async () => {
 
+    const response = await authorizeAxiosInstance.get('/product/productPriceRangePromotion');
+    return response;
+
+};
 export async function getProductNameByIds(listId) {
     try {
         let response = await authorizeAxiosInstance.post("/product/get-name-product-by-id", listId);
@@ -79,9 +80,9 @@ export {
     deleteProduct,
     getAllProduct,
     getFindSearch,
-    findImageByIdProduct,
     findProductProductDetailResponse,
     filterProductProductDetailResponse,
     findProductResponseById,
-    putUpdateProduct
+    putUpdateProduct,
+    getAllPriceRangePromotion
 };
