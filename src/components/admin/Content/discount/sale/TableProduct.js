@@ -6,7 +6,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllProduct, fetchSearchProduct } from '../../../../../redux/action/productAction';
 import { useDebounce } from 'use-debounce';
-import ImageProduct from '../../../../../image/ImageProduct'
+import ListImageProduct from '../../../../../image/ListImageProduct'
 import { findProductResponseById } from '../../../../../Service/ApiProductService'
 import { toast } from 'react-toastify';
 import { Button } from 'react-bootstrap';
@@ -195,7 +195,7 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
                                         />
                                     </td>
                                     <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                    <td><ImageProduct id={item.id} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                    <td><ListImageProduct id={item.id} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                     <td>{item.name}</td>
                                     <td>{item.quantity} {item.baseUnit}</td>
                                     <td>

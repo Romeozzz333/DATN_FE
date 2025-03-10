@@ -217,23 +217,6 @@ export const fetchAllProductPromotion = () => {
 
     }
 }
-export const fetchAllPriceRangePromotion = () => {
-    return async (dispatch) => {
-        dispatch(fetchPostsRequest());
-        try {
-            const response = await getAllPriceRangePromotion();
-            if (response && response.status === 200) {
-                dispatch(fetchPriceRangePromotionSuccess(response.data));
-            } else {
-                toast.error('Error fetching price range promotions');
-                dispatch(fetchPostsError('Unexpected response status'));
-            }
-        } catch (error) {
-            toast.error(error.message || 'Error fetching price range promotions');
-            dispatch(fetchPostsError(error.message));
-        }
-    };
-};
 
 export const fetchPostsRequest = () => {
     return {

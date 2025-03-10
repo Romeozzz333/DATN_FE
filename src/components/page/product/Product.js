@@ -4,185 +4,175 @@ import "./Product.scss";
 import Dropdown from "./Dropdown/Dropdow";
 import ListGroup from "./ListGroup";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPriceRangePromotionByQuang } from "../../../redux/action/productDetailAction";
+import { getAllPriceRangePromotion } from '../../../Service/ApiProductService';
 import { fetchAllCategory } from "../../../redux/action/categoryAction";
 import { Link } from "react-router-dom";
 import Pagination from "react-bootstrap/Pagination";
-import { debounce } from "lodash";
-import ListImageProduct from '../../../image/ImageProduct';
-import { useLocation } from "react-router-dom";
-import { Tooltip, OverlayTrigger } from 'react-bootstrap'
+import ListImageProduct from '../../../image/ListImageProduct';
+import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 
 const Product = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const location = useLocation();
 
   const [filters, setFilters] = useState({
     nameProduct: "",
     idCategory: null,
     minPrice: null,
     maxPrice: null,
-    gender: null, // Giá trị mặc định là null
-    sortOption: "Mới nhất",
+    sortOption: "Giá thấp đến cao", // Mặc định là "Giá thấp đến cao"
   });
-  const queryParams = new URLSearchParams(location.search);
-  const genderQuery = queryParams.get("gender");
-  useEffect(() => {
-    if (genderQuery) {
-      const genderValue = genderQuery === "male" ? true : false; // Assuming true is male, false is female
-      setFilters((prevFilters) => ({
-        ...prevFilters,
-        gender: genderValue,
-      }));
-    }
-  }, [genderQuery]);
 
   const dispatch = useDispatch();
-
-  // Fetching data from Redux state
-  const products = useSelector((state) => state.productDetail.listPriceRangePromotionByQuang || { data: [] });
-
-  const sizes = useSelector((state) => state.size.listSize || []);
-  const colors = useSelector((state) => state.color.listColor || []);
-  const brands = useSelector((state) => state.brand.listBrand || []);
   const categories = useSelector((state) => state.category.listCategory || []);
+  const [products, setProducts] = useState([]);
 
-  // Fetch dropdown data on mount
+  // Hàm gọi API lấy danh sách sản phẩm
+  const fetchAllPriceRangePromotion = async () => {
+    try {
+      const response = await getAllPriceRangePromotion();
+      if (response && response.status === 200) {
+        setProducts(response.data);
+      } else {
+        toast.error('Lỗi khi tải danh sách sản phẩm');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Lỗi khi tải danh sách sản phẩm');
+    }
+  };
+
   useEffect(() => {
     dispatch(fetchAllCategory());
+    fetchAllPriceRangePromotion();
   }, [dispatch]);
-
-  // Fetch products based on filters
-  useEffect(() => {
-    dispatch(
-      fetchPriceRangePromotionByQuang(
-        filters.nameProduct,
-        filters.idColor,
-        filters.idSize,
-        filters.idBrand,
-        filters.idCategory,
-        filters.minPrice,
-        filters.maxPrice,
-        filters.gender
-      )
-    );
-  }, [dispatch, filters]);
-
-  // Adjust items per page based on screen size
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1440) {
-        setItemsPerPage(16);
-      } else if (window.innerWidth >= 1200) {
-        setItemsPerPage(12);
-      } else if (window.innerWidth >= 768) {
-        setItemsPerPage(8);
-      } else {
-        setItemsPerPage(4);
-      }
-      // Reset to the first page to ensure consistent display
-      setCurrentPage(1);
-    };
-
-    // Call handleResize initially to set items per page correctly
-    handleResize();
-
-    // Debounce resize event to improve performance
-    const debouncedResize = debounce(handleResize, 200);
-
-    window.addEventListener("resize", debouncedResize);
-
-    return () => {
-      window.removeEventListener("resize", debouncedResize);
-    };
-  }, []);
 
   // Format currency
   const formatCurrency = (value) => {
-    if (!value) return 0;
+    if (!value) return '0';
     const roundedValue = Math.round(value) || 0;
     return roundedValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   // Filter unique products by id
   const uniqueProducts = useMemo(() => {
-    if (!Array.isArray(products.data)) return [];
+    if (!Array.isArray(products)) return [];
 
     const productMap = new Map();
-    products.data.forEach((product) => {
+    products.forEach((product) => {
       if (!productMap.has(product.idProduct)) {
-        productMap.set(product.idProduct, product); // Add the first product with this id
+        productMap.set(product.idProduct, product);
       }
     });
-    return Array.from(productMap.values()); // Return only unique products
-  }, [products.data]);
+    return Array.from(productMap.values());
+  }, [products]);
 
-  const sortedProducts = useMemo(() => {
-    const sortOptions = {
-      "Mới nhất": (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-      "Bán chạy": (a, b) => b.sales - a.sales,
-      "Giá cao đến thấp": (a, b) => b.minPrice - a.minPrice,
-      "Giá thấp đến cao": (a, b) => a.minPrice - b.minPrice,
-    };
-
-    // Lọc theo giới tính
+  const filteredAndSortedProducts = useMemo(() => {
     let filteredProducts = [...uniqueProducts];
-    if (filters.gender !== null) {
-      filteredProducts = filteredProducts.filter(
-        (product) => product.gender === filters.gender
+
+    if (filters.nameProduct) {
+      filteredProducts = filteredProducts.filter((product) =>
+        product.nameProduct.toLowerCase().includes(filters.nameProduct.toLowerCase())
       );
     }
 
-    return filteredProducts.sort(sortOptions[filters.sortOption]);
-  }, [uniqueProducts, filters.gender, filters.sortOption]);
+    if (filters.idCategory) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.idCategory === filters.idCategory
+      );
+    }
 
-  // Pagination
+    if (filters.minPrice !== null) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.priceSale >= filters.minPrice
+      );
+    }
+    if (filters.maxPrice !== null) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.priceSale <= filters.maxPrice
+      );
+    }
+
+    const sortOptions = {
+      "Giá cao đến thấp": (a, b) => b.priceSale - a.priceSale,
+      "Giá thấp đến cao": (a, b) => a.priceSale - b.priceSale,
+    };
+
+    return filteredProducts.sort(sortOptions[filters.sortOption] || (() => 0));
+  }, [uniqueProducts, filters]);
+
   const totalPages = useMemo(() => {
-    if (!Array.isArray(sortedProducts)) return 0;
-    return Math.ceil(sortedProducts.length / itemsPerPage);
-  }, [sortedProducts, itemsPerPage]);
+    if (!Array.isArray(filteredAndSortedProducts)) return 0;
+    return Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
+  }, [filteredAndSortedProducts, itemsPerPage]);
 
   const currentProducts = useMemo(() => {
     const indexOfLastProduct = currentPage * itemsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
-    return sortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-  }, [sortedProducts, currentPage, itemsPerPage]);
+    return filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  }, [filteredAndSortedProducts, currentPage, itemsPerPage]);
 
-  // Update filter
+
   const updateFilter = (key, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
       [key]: value,
     }));
+    setCurrentPage(1);
   };
 
-
+  const renderProductPricing = (product) => (
+    <div className="product-pricing">
+      {product.priceBase === product.priceSale ? (
+        <OverlayTrigger
+          placement="top"
+          overlay={
+            <Tooltip>
+              {formatCurrency(product.priceBase)} VND
+            </Tooltip>
+          }
+        >
+          <p className="product-price truncate-text">
+            {formatCurrency(product.priceBase)} VND
+          </p>
+        </OverlayTrigger>
+      ) : (
+        <OverlayTrigger
+          placement="top"
+          overlay={
+            <Tooltip>
+              Giá gốc: {formatCurrency(product.priceBase)} VND - Giá khuyến mãi: {formatCurrency(product.priceSale)} VND
+            </Tooltip>
+          }
+        >
+          <div>
+            <p className="product-sale-price text-danger truncate-text">
+              {formatCurrency(product.priceSale)} VND
+            </p>
+            <p className="product-original-price text-decoration-line-through truncate-text">
+              {formatCurrency(product.priceBase)} VND
+            </p>
+          </div>
+        </OverlayTrigger>
+      )}
+    </div>
+  );
 
   return (
     <div className="homePage">
       <Banner />
 
       <div className="row m-5">
-        {/* Sidebar */}
         <div className="col-lg-2 col-md-4 col-sm-12 pt-5">
-          <ListGroup
-            title="Thương hiệu"
-            items={brands.map((brand) => brand.name)}
-            onSelectionChange={(selectedBrand) =>
-              updateFilter("idBrand", brands.find((brand) => brand.name === selectedBrand)?.id)
-            }
-          />
           <ListGroup
             title="Danh mục"
             items={categories.map((category) => category.name)}
             onSelectionChange={(selectedCategory) =>
-              updateFilter("idCategory", categories.find((category) => category.name === selectedCategory)?.id)
+              updateFilter("idCategory", categories.find((category) => category.name === selectedCategory)?.id || null)
             }
           />
         </div>
 
-        {/* Product Listing */}
         <div className="col-lg-10 col-md-8 col-sm-12">
           <div className="collection-content-wrapper">
             <div className="collection-head">
@@ -195,112 +185,35 @@ const Product = () => {
                   onChange={(e) => updateFilter("nameProduct", e.target.value)}
                 />
                 <Dropdown
-                  title="Kích cỡ"
-                  menu={["Tất cả kích cỡ", ...sizes.map((size) => size.name)]}
-                  value={
-                    filters.idSize === null
-                      ? "Tất cả kích cỡ"
-                      : sizes.find((size) => size.id === filters.idSize)?.name || ""
-                  }
-                  onChange={(selectedSize) =>
-                    updateFilter(
-                      "idSize",
-                      selectedSize === "Tất cả" ? null : sizes.find((size) => size.name === selectedSize)?.id
-                    )
-                  }
-                />
-
-                <Dropdown
-                  title="Màu sắc"
-                  menu={["Tất cả màu sắc", ...colors.map((color) => color.name)]}
-                  value={
-                    filters.idColor === null
-                      ? "Tất cả màu sắc"
-                      : colors.find((color) => color.id === filters.idColor)?.name || ""
-                  }
-                  onChange={(selectedColor) =>
-                    updateFilter(
-                      "idColor",
-                      selectedColor === "Tất cả" ? null : colors.find((color) => color.name === selectedColor)?.id
-                    )
-                  }
-                />
-
-
-                <Dropdown
-                  title="Giới tính"
-                  menu={["Giới tính", "Nam", "Nữ"]}
-                  value={
-                    filters.gender === null
-                      ? "Giới tính"
-                      : filters.gender === true
-                        ? "Nam"
-                        : "Nữ"
-                  }
-                  onChange={(selectedGender) => {
-                    const genderValue =
-                      selectedGender === "Nam"
-                        ? true
-                        : selectedGender === "Nữ"
-                          ? false
-                          : null;
-
-                    updateFilter("gender", genderValue); // Cập nhật giá trị gender
-                  }}
-                />
-
-
-
-                <Dropdown
                   title="Sắp xếp"
-                  // menu={["Tất cả", "Mới nhất", "Bán chạy", "Giá cao đến thấp", "Giá thấp đến cao"]}
-                  menu={["Tất cả", "Giá cao đến thấp", "Giá thấp đến cao"]}
-                  value={filters.sortOption || "Tất cả"}
-                  onChange={(selectedSort) =>
-                    updateFilter("sortOption", selectedSort === "Tất cả" ? null : selectedSort)
-                  }
+                  menu={["Giá cao đến thấp", "Giá thấp đến cao"]}
+                  value={filters.sortOption}
+                  onChange={(selectedSort) => updateFilter("sortOption", selectedSort)}
                 />
-
               </div>
             </div>
 
             <div className="collection-body">
               {currentProducts.length > 0 ? (
                 <div className="row m-2">
-                  {currentProducts.map((product, index) => (
+                  {currentProducts.map((product) => (
                     <div
-                      key={`${product.idProduct}-${index}`}
+                      key={product.idProduct}
                       className="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex align-items-stretch"
                     >
-                      <Link to={`/product-detail?idProduct=${product.idProduct}`}>
-                        <div className="card product-card">
+                      <Link to={`/product-detail?idProduct=${product.idProduct}`} className="w-100">
+                        <div className="card product-card h-100">
                           <div className="image-container">
                             <ListImageProduct id={product.idProduct} />
                           </div>
                           <div className="card-body text-center">
-                          <OverlayTrigger
-    placement="top"
-    overlay={<Tooltip>{product.nameProduct}</Tooltip>}
->
-    <p className="product-name truncate-text">{product.nameProduct}</p>
-</OverlayTrigger>
-
-                            <div className="product-pricing">
-                              {product.minPriceAfterDiscount === product.minPrice &&
-                                product.maxPriceAfterDiscount === product.maxPrice ? (
-                                <p className="product-price">{formatCurrency(product.minPrice)} VND</p>
-                              ) : (
-                                <>
-                                  <p className="product-sale-price text-danger">
-                                    {formatCurrency(product.minPriceAfterDiscount)} VND -{" "}
-                                    {formatCurrency(product.maxPriceAfterDiscount)} VND
-                                  </p>
-                                  <p className="product-original-price text-decoration-line-through">
-                                    {formatCurrency(product.minPrice)} VND - {formatCurrency(product.maxPrice)} VND
-                                  </p>
-                                </>
-                              )}
-                            </div>
+                            <OverlayTrigger
+                              placement="top"
+                              overlay={<Tooltip>{product.nameProduct}</Tooltip>}
+                            >
+                              <p className="product-name truncate-text">{product.nameProduct}</p>
+                            </OverlayTrigger>
+                            {renderProductPricing(product)}
                           </div>
                         </div>
                       </Link>
@@ -314,7 +227,6 @@ const Product = () => {
                 </div>
               )}
 
-              {/* Pagination */}
               <div className="d-flex justify-content-center">
                 <Pagination>
                   <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />

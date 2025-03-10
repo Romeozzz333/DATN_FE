@@ -4,12 +4,10 @@ import Pagination from 'react-bootstrap/Pagination';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllProduct, fetchSearchProduct } from '../../../../../redux/action/productAction';
-import { useDebounce } from 'use-debounce';
-import ImageProduct from '../../../../../image/ImageProduct'
+import { fetchAllProduct } from '../../../../../redux/action/productAction';
+import ListImageProduct from '../../../../../image/ListImageProduct'
 import { findProductResponseById } from '../../../../../Service/ApiProductService'
 import { toast } from 'react-toastify';
-import { Button } from 'react-bootstrap';
 const NotFoundData = '/NotFoundData.png';
 const TableProductUpdate = ({ selectedProductIds, setSelectedProductIds }) => {
     const dispatch = useDispatch();
@@ -194,7 +192,7 @@ const TableProductUpdate = ({ selectedProductIds, setSelectedProductIds }) => {
                                         />
                                     </td>
                                     <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                    <td><ImageProduct id={item.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                    <td><ListImageProduct id={item.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                     <td>{item.nameProduct}</td>
                                     <td>{item.quantityProduct} {item.baseUnit}</td>
                                     <td>

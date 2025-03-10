@@ -12,7 +12,7 @@ import { ResponsiveContainer } from 'recharts';
 import { fetchBillStatisticsAction } from '../../../../redux/action/billAction';
 import { fetchAllAccountCustomer } from '../../../../redux/action/AccountAction';
 import { fetchStatisticsProduct } from '../../../../Service/ApiBillDetailService';
-import ListImageProduct from '../../../../image/ImageProduct'
+import ListImageProduct from '../../../../image/ListImageProduct'
 import './ManageStatistical.scss';
 import { format } from 'date-fns';
 import AuthGuard from "../../../auth/AuthGuard";

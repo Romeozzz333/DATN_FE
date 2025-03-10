@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 import { CiCircleMinus, CiCirclePlus } from "react-icons/ci";
-import ListImageProduct from '../../../image/ImageProduct';
+import ListImageProduct from '../../../image/ListImageProduct';
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { plusCartDetail, subtractCartDetail, deleteCartDetail } from '../../../Service/ApiCartSevice'
 import { findListPayProductDetail } from '../../../Service/ApiProductDetailService';
