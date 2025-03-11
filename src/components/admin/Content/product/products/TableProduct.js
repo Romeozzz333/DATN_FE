@@ -58,59 +58,61 @@ const TableShoe = ({ currentPage, setCurrentPage }) => {
             <Table striped bordered hover>
                 <thead className='table'>
                     <tr>
-                        <th>STT</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Số lượng</th>
-                        <th>Đơn vị gốc</th>
-                        <th>Danh mục</th>
-                        <th>Ảnh</th>
-                        <th>Trạng thái</th>
-                        <th>Chức năng</th>
+                        <th className='text-center'>STT</th>
+                        <th className='text-center'>Tên sản phẩm</th>
+                        <th className='text-center'>Số lượng</th>
+                        <th className='text-center'>Đơn vị gốc</th>
+                        <th className='text-center'>Danh mục</th>
+                        <th className='text-center'>Ảnh</th>
+                        <th className='text-center'>Trạng thái</th>
+                        <th className='text-center'>Chức năng</th>
                     </tr>
                 </thead>
                 <tbody>
                     {currentItems && currentItems.length > 0 ? (
                         currentItems.map((item, index) => (
                             <tr key={`table-product-${item.id}`}>
-                                <td>{index + 1 + (currentPage - 1) * 5}</td>
-                                <td>{item.name}</td>
-                                <td>{item.quantity} {item.baseUnit}</td>
-                                <td>{item.baseUnit}</td>
-                                <td>{item.nameCategory}</td>
-                                <td>
+                                <td className='text-center align-middle'>{index + 1 + (currentPage - 1) * 5}</td>
+                                <td className='text-center align-middle'>{item.name}</td>
+                                <td className='text-center align-middle'>{item.quantity} {item.baseUnit}</td>
+                                <td className='text-center align-middle'>{item.baseUnit}</td>
+                                <td className='text-center align-middle'>{item.nameCategory}</td>
+                                <td className="d-flex justify-content-center align-items-center">
                                     <ListImageProduct
                                         id={item.id}
-                                        style={{ maxWidth: '50%', height: 'auto' }}
-                                        maxHeight="1000px"
+                                        maxWidth="100px"
+                                        maxHeight="100px"
+                                        containerClassName="product-image-container"
+                                        imageClassName="product-image"
+                                        center={true} // Căn giữa
                                     />
                                 </td>
-                                <td>
-                                    <div className="form-check form-switch">
+                                <td className="text-center align-middle">
+                                    <div
+                                        className="form-check form-switch d-flex justify-content-center align-items-center"
+                                        style={{ padding: '0' }}
+                                    >
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
                                             role="switch"
                                             id={`flexSwitchCheckChecked-${item.id}`}
                                             checked={item.status === 'ACTIVE'}
-                                            onChange={(e) => dispatch(updateStatusProductById(item.id, e.target.checked))}  // Truyền trạng thái checked
+                                            onChange={(e) => dispatch(updateStatusProductById(item.id, e.target.checked))}
+                                            style={{ margin: 0 }}
                                         />
                                     </div>
                                 </td>
-                                <td>
-                                    <div className="d-flex justify-content-start">
-                                        <Link to={`/admins/manage-detail-shoe?idProduct=${item.id}`} className="mx-2">
+                                <td className="text-center align-middle">
+                                    <div className="d-flex justify-content-start justify-content-center align-items-center">
+                                        <Link to={`/admins/manage-detail-product?idProduct=${item.id}`} className="mx-2">
                                             <Button variant='warning'>
                                                 <IoIosEye />
                                             </Button>
                                         </Link>
-                                        <Link to={`/admins/manage-update-shoe?idProduct=${item.id}`} className="mx-2">
+                                        <Link to={`/admins/manage-update-product?idProduct=${item.id}`} className="mx-2">
                                             <Button variant="success">
                                                 <FaPenToSquare />
-                                            </Button>
-                                        </Link>
-                                        <Link to={`/admins/manage-create-shoe-detail?idProduct=${item.id}`} className="mx-2">
-                                            <Button>
-                                                <IoMdAdd />
                                             </Button>
                                         </Link>
                                     </div>

@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import './ModelCreatePromotion.scss';
 import { postsUpdatePromotion } from '../../../../../redux/action/promotionAction';
+import { fetchPromotionAndProductPromotion } from '../../../../../redux/action/promotionAction'
 import TableProductUpdate from './TableProductUpdate';
 export default function ModelUpdatePromotion() {
     const dispatch = useDispatch();
@@ -17,7 +18,9 @@ export default function ModelUpdatePromotion() {
     const [selectedProductIds, setSelectedProductIds] = useState([]);
     const [searchParams] = useSearchParams();
     const idPromotion = searchParams.get('idPromotion');
-
+    useEffect(() => {
+        dispatch(fetchPromotionAndProductPromotion(idPromotion));
+    }, [dispatch]);
     const validationSchema = yup.object().shape({
         startAt: yup.date()
             .required('Ngày bắt đầu là bắt buộc')

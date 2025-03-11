@@ -84,11 +84,12 @@ const Cart = () => {
                             }
                         }
                         const response = await getCartDetailByAccountId(data.id);
+
                         if (response.status === 200) {
                             setCartDetails(response.data);
                         }
                     } catch (error) {
-                        window.location.href = "/cart";
+                        // window.location.href = "/cart";
                         console.error(error);
                     }
                     setUser(data);
@@ -411,7 +412,7 @@ const Cart = () => {
     });
     return (
         <div id="cart" className="inner m-5 p-5">
-            <EventListener handlers={handlers} />
+            {/* <EventListener handlers={handlers} /> */}
             <h1 className="cart-title">GIỎ HÀNG</h1>
             {cartDetails && cartDetails.length > 0 ? (
                 <div className="row">

@@ -39,7 +39,6 @@ import ManageProduct from "./components/admin/Content/product/products/ManagePro
 import ModelCreateProduct from "./components/admin/Content/product/products/createProduct/ModelCreateProduct";
 import ModelDetailProduct from "./components/admin/Content/product/products/detailProduct/ModelDetailProduct";
 import ModelUpdateProduct from "./components/admin/Content/product/products/updateProduct/ModelUpdateProduct";
-import ModelCreateProductDetail from "./components/admin/Content/product/products/createProductDetail/ModelCreateProductDetail";
 import ManageStatistical from "./components/admin/Content/statistical/ManageStatistical";
 import ManageAccountCustomer from "./components/admin/Content/account/customer/ManageAccountCustomer";
 import ManageAccountEmployee from "./components/admin/Content/account/employee/ManageAccountEmployee";
@@ -114,23 +113,20 @@ root.render(
             />
             <Route path="manage-category" element={<ManageCategory />} />
 
-            <Route path="manage-shoe" element={<ManageProduct />} />
+            <Route path="manage-product" element={<ManageProduct />} />
             <Route
-              path="manage-create-shoe"
+              path="manage-create-product"
               element={<ModelCreateProduct />}
             />
             <Route
-              path="manage-detail-shoe"
+              path="manage-detail-product"
               element={<ModelDetailProduct />}
             />
             <Route
-              path="manage-update-shoe"
+              path="manage-update-product"
               element={<ModelUpdateProduct />}
             />
-            <Route
-              path="manage-create-shoe-detail"
-              element={<ModelCreateProductDetail />}
-            />
+
 
             <Route
               path="manage-statistical"

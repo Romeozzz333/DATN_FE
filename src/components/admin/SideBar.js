@@ -119,7 +119,7 @@ const SideBar = (props) => {
                     </Menu>
                     {account?.role === "ADMIN" && <Menu iconShape="circle">
                         <SubMenu icon={<FaBoxesPacking />} title="Quản lý sản phẩm">
-                            <MenuItem icon={<GiConverseShoe />}>Sản phẩm<Link to="/admins/manage-shoe" /></MenuItem>
+                            <MenuItem icon={<GiConverseShoe />}>Sản phẩm<Link to="/admins/manage-product" /></MenuItem>
                             <SubMenu icon={<GiRunningShoe />} title="Thuộc tính sản phẩm">
                                 <MenuItem icon={<BiCategory />}>Danh mục<Link to="/admins/manage-category" /></MenuItem>
                             </SubMenu>
