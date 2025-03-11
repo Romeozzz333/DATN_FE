@@ -2,16 +2,12 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import './ModelUpdateProduct.scss';
 import InfoProduct from './InfoProduct';
-import TableProductDetail from './TableProductDetail';
-import ModelAddQuanityPrice from './ModelAddQuanityPrice';
-// import { createNewNewProduct } from '../../../../../../redux/action/productAction'
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { findProductByIdProduct, updateProduct } from '../../../../../../redux/action/productAction'
 import { fetchAllProductDetail } from '../../../../../../redux/action/productDetailAction';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchAllProductProductDetail } from '../../../../../../redux/action/productAction'
-import { Link } from 'react-router-dom';
 import AuthGuard from "../../../../../auth/AuthGuard";
 import RoleBasedGuard from "../../../../../auth/RoleBasedGuard";
 import swal from 'sweetalert';
@@ -112,11 +108,6 @@ const ModelUpdateProduct = () => {
             return false;
         }
 
-        // // Kiểm tra productDetailRequest là mảng và không rỗng
-        // if (!Array.isArray(newProduct.productDetailRequest) || newProduct.productDetailRequest.length === 0) {
-        //     toast.error("Chi tiết sản phẩm là bắt buộc");
-        //     return false;
-        // }
 
         // Nếu tất cả các trường đều hợp lệ
         return true;
@@ -162,7 +153,7 @@ const ModelUpdateProduct = () => {
                     });
 
                     dispatch(fetchAllProductProductDetail());
-                    navigate('/admins/manage-shoe');
+                    navigate('/admins/manage-product');
                 } else {
                     await swal({
                         title: "Thất bại",
@@ -194,28 +185,9 @@ const ModelUpdateProduct = () => {
                             setFormErrors={setFormErrors} />
                     </div>
 
-                    <div className="model-create-product-table p-3 m-3">
-                        <h4 className="text-center p-3">Chi tiết sản phẩm</h4>
-                        <div className="add-button text-end">
-                            {isProductValid() && productDetail.length > 0 && (
-                                <ModelAddQuanityPrice
-                                    className="mx-4 p-2"
-                                    productDetail={productDetail}
-                                    setProductDetail={setProductDetail}
-                                    setSelectedProductDetail={setSelectedProductDetail}
-                                />
-                            )}
-                            <Button className="mx-3" onClick={handleSubmitUpdate}>Hoàn tất</Button>
-                        </div>
-                        <div className='overflow-x-auto'>
-                            <TableProductDetail
-                                product={product}
-                                productDetail={productDetail}
-                                setProductDetail={setProductDetail}
-                                selectedProductDetail={selectedProductDetail}
-                                setSelectedProductDetail={setSelectedProductDetail}
-                            />
-                        </div>
+                    <div className="model-create-product-sizecolor p-3 m-3">
+                        <h4 className="text-center p-3">Thông tin đơn vị quy đổi</h4>
+                        {/* <ModelDetailUntis idProduct={idProduct} /> */}
                     </div>
                 </div>
             </RoleBasedGuard>

@@ -2,21 +2,20 @@ import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import './ModelDetailProduct.scss';
 import InfoProduct from './InfoProduct';
-import TableProductDetail from './TableProductDetail';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { findProductByIdProduct } from '../../../../../../redux/action/productAction'
-import { fetchAllProductDetail } from '../../../../../../redux/action/productDetailAction';
+import ListImageProduct from '../../../../../../image/ListImageProduct';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthGuard from "../../../../../auth/AuthGuard";
 import RoleBasedGuard from "../../../../../auth/RoleBasedGuard";
+import ModelDetailUntis from "./ModelDetailUntis";
 const ModelDetailProduct = () => {
     const dispatch = useDispatch();
     const [searchParams] = useSearchParams();
     const idProduct = searchParams.get('idProduct');
 
     const product = useSelector((state) => state.product.product);
-    const productDetail = useSelector((state) => state.productDetail.listProductDetail);
     useEffect(() => {
         if (idProduct) {
             getData(idProduct);
@@ -26,7 +25,6 @@ const ModelDetailProduct = () => {
     const getData = (idProduct) => {
         if (idProduct) {
             dispatch(findProductByIdProduct(idProduct));
-            dispatch(fetchAllProductDetail([idProduct]))
         }
     }
 
@@ -38,18 +36,13 @@ const ModelDetailProduct = () => {
                         <h4 className="text-center p-3">Thông tin sản phẩm</h4>
                         <InfoProduct product={product} />
                     </div>
-                    <div className="model-create-product-table p-3 m-3">
-                        <h4 className="text-center p-3">Chi tiết sản phẩm</h4>
-                        <div className='overflow-x-auto'>
-                            <TableProductDetail
-                                product={product}
-                                productDetail={productDetail}
-                            />
-                        </div>
+                    <div className="model-create-product-sizecolor p-3 m-3">
+                        <h4 className="text-center p-3">Thông tin đơn vị quy đổi</h4>
+                        <ModelDetailUntis idProduct={idProduct} />
                     </div>
                 </div>
             </RoleBasedGuard>
-        </AuthGuard>
+        </AuthGuard >
     );
 }
 

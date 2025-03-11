@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import TableProduct from './TableProduct';
 import { Link } from 'react-router-dom';
 import './ManageProduct.scss';
-
 import { useDebounce } from 'use-debounce';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchfilterProductProductDetail, fetchAllProductProductDetail } from '../../../../../redux/action/productAction'
@@ -53,7 +52,7 @@ const ManageShoe = () => {
                                         />
                                     </div>
                                     <div className='shoe-add mb-3 col-2'>
-                                        <Link to="/admins/manage-create-shoe">
+                                        <Link to="/admins/manage-create-product">
                                             <Button variant="info">
                                                 <IoIosAddCircleOutline /> Thêm sản phẩm
                                             </Button>

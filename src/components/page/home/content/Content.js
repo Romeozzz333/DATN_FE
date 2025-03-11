@@ -123,8 +123,6 @@ const Content = () => {
                                     <div className="image-container">
                                         <ListImageProduct
                                             id={product.idProduct}
-                                            style={{ maxWidth: '100%', height: 'auto' }}
-                                            maxHeight="1000px"
                                         />
                                     </div>
                                 </Link>
@@ -193,8 +191,6 @@ const Content = () => {
                                     <div className="image-container">
                                         <ListImageProduct
                                             id={product.idProduct}
-                                            style={{ maxWidth: '100%', height: 'auto' }}
-                                            maxHeight="1000px"
                                         />
                                     </div>
                                 </Link>

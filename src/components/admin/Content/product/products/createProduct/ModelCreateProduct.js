@@ -141,7 +141,7 @@ const ModelCreateProduct = () => {
                 if (isSuccess) {
                     swal('Thành công', 'Sản phẩm đã được tạo thành công!', 'success');
                     dispatch(fetchAllProductProductDetail());
-                    navigate('/admins/manage-shoe');
+                    navigate('/admins/manage-product');
                 } else {
                     swal('Thất bại', 'Không thể tạo sản phẩm. Vui lòng thử lại.', 'error');
                 }
