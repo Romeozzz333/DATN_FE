@@ -79,7 +79,7 @@ const TableShoe = ({ currentPage, setCurrentPage }) => {
                                 <td className='text-center align-middle'>{item.nameCategory}</td>
                                 <td className="d-flex justify-content-center align-items-center">
                                     <ListImageProduct
-                                        id={item.id}
+                                        id={item?.id}
                                         maxWidth="100px"
                                         maxHeight="100px"
                                         containerClassName="product-image-container"

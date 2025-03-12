@@ -1,65 +1,90 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import "./ProductDetail.scss";
 import { useSelector, useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import { BsCheck } from 'react-icons/bs';
+import ListImageProduct from '../../../../image/ListImageProduct';
 import { findProduct } from '../../../../redux/action/productAction';
 import { addProductToCart } from '../../../../Service/ApiCartSevice';
-import { getAccountLogin } from "../../../../Service/ApiAccountService";
+import { getAccountLogin } from '../../../../Service/ApiAccountService';
 import { initialize } from '../../../../redux/action/authAction';
 import { fetchProductDetailActive } from '../../../../redux/action/productDetailAction';
-import { BsCheck } from "react-icons/bs";
-import { toast } from 'react-toastify';
-import ListImageProduct from '../../../../image/ListImageProduct'
-import { addToCartLocal } from '../../../managerCartLocal/CartManager'
+import { addToCartLocal } from '../../../managerCartLocal/CartManager';
+import { findProductResponseByIdAndType } from '../../../../Service/ApiProductUnitsService';
+import './ProductDetail.scss';
 
 function ProductDetail() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const idProduct = searchParams.get('idProduct');
-  const product = useSelector((state) => state.product.product);
-  const listroductDetail = useSelector((state) => state.productDetail.listProductPromotion);
+  const product = useSelector((state) => state.product.product || {});
+  const [productUnits, setProductUnits] = useState([]);
+  const [selectedProductUnit, setSelectedProductUnit] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Fetch product and product units
   useEffect(() => {
-    dispatch(findProduct(idProduct));
-    dispatch(fetchProductDetailActive(idProduct));
-  }, [dispatch]);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([dispatch(findProduct(idProduct)), findProductUnits()]);
+      } catch (error) {
+        toast.error('Lỗi khi tải dữ liệu sản phẩm');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [dispatch, idProduct]);
 
+  const findProductUnits = async () => {
+    try {
+      const response = await findProductResponseByIdAndType(idProduct, true);
+      if (response && response.status === 200) {
+        setProductUnits(response.data || []);
+        if (response.data && response.data.length > 0) {
+          setSelectedProductUnit(response.data[0]); // Chọn unit đầu tiên mặc định
+        }
+      } else {
+        toast.error('Lỗi khi tải danh sách đơn vị sản phẩm');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Lỗi khi tải danh sách đơn vị sản phẩm');
+    }
+  };
 
-  const [numberSelect, setNumberSelect] = useState(1);
-  const [colorSelect, setColorSelect] = useState("");
-  const [sizeSelect, setSizeSelect] = useState("");
+  // Format currency
+  const formatCurrency = (value) => {
+    const roundedValue = Math.round(value || 0);
+    return roundedValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
 
-  // Lấy danh sách màu sắc
-  const colors = [...new Set(listroductDetail.map((item) => item.nameColor))];
+  // Handle selecting a product unit
+  const handleSelectedProductUnit = (unit) => {
+    setSelectedProductUnit(unit);
+    setQuantity(1); // Reset số lượng khi chọn unit mới
+  };
 
-  // Lấy danh sách kích cỡ
-  const sizes = [...new Set(listroductDetail.map((item) => item.nameSize))];
+  // Calculate max quantity based on conversion factor (làm tròn xuống)
+  const getMaxQuantity = () => {
+    if (!selectedProductUnit || !product.quantity) return 1;
+    return Math.floor(product.quantity / selectedProductUnit.conversionFactor); // Làm tròn xuống
+  };
 
-  // Xác định kích cỡ nào cần disabled khi chọn màu
-  const disabledSizes = colorSelect
-    ? sizes.filter(
-      (size) =>
-        !listroductDetail.some(
-          (item) => item.nameColor === colorSelect && item.nameSize === size
-        )
-    )
-    : [];
-
-  // Xác định màu nào cần disabled khi chọn kích cỡ
-  const disabledColors = sizeSelect
-    ? colors.filter(
-      (color) =>
-        !listroductDetail.some(
-          (item) => item.nameSize === sizeSelect && item.nameColor === color
-        )
-    )
-    : [];
-
-  // Tìm sản phẩm chi tiết dựa trên lựa chọn
-  const selectedProduct = listroductDetail.find(
-    (item) => item.nameColor === colorSelect && item.nameSize === sizeSelect
-  );
+  // Handle quantity change
+  const handleQuantityChange = (e) => {
+    const value = Number(e.target.value);
+    const maxQuantity = getMaxQuantity();
+    if (value < 1) {
+      setQuantity(1);
+    } else if (value > maxQuantity) {
+      setQuantity(maxQuantity);
+    } else {
+      setQuantity(value);
+    }
+  };
 
   const addProductToCartOfAccount = async (orderDetails, user) => {
     try {
@@ -72,19 +97,19 @@ function ProductDetail() {
       console.log(error);
     }
   }
-  const addProductToCartLocal = async (orderDetails, quantityProductDetail) => {
-    addToCartLocal(orderDetails, quantityProductDetail)
+  const addProductToCartLocal = async (orderDetails, quantityProduct) => {
+    addToCartLocal(orderDetails, quantityProduct)
     navigate(`/cart`);
   }
   const handleAddProductToCart = async () => {
     try {
       let orderDetails = {
-        idProductDetail: selectedProduct.idProductDetail,
-        quantity: numberSelect
+        idProduct: Number(idProduct),
+        quantity: quantity * selectedProductUnit.conversionFactor
       }
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        addProductToCartLocal(orderDetails, selectedProduct?.quantityProductDetail || 1)
+        addProductToCartLocal(orderDetails, product?.quantity || 1)
         dispatch(initialize({ isAuthenticated: false, user: null }))
       } else {
         try {
@@ -105,170 +130,142 @@ function ProductDetail() {
       console.log(error);
     }
   };
-  const handlePayNow = async () => {
-    let productDetails = {
-      idProductDetail: selectedProduct.idProductDetail,
-      quantity: numberSelect
-    }
-    navigate(`/Payment`, {
-      state: {
-        listProductDetails: [productDetails],
-        method: false
-      }
-    });
-  };
-  // Hàm làm tròn và định dạng số
-  const formatCurrency = (value) => {
-    // Làm tròn thành số nguyên
-    const roundedValue = Math.round(value);
-    // Định dạng số thành chuỗi với dấu phẩy phân cách hàng nghìn
-    return roundedValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
 
+  // Handle pay now
+  // const handlePayNow = () => {
+  //   if (!selectedProductUnit) {
+  //     toast.error('Vui lòng chọn loại sản phẩm');
+  //     return;
+  //   }
+  //   navigate('/checkout', {
+  //     state: {
+  //       productId: idProduct,
+  //       productUnitId: selectedProductUnit.id,
+  //       quantity,
+  //     },
+  //   });
+  // };
 
   return (
     <div id="product-detail" className="inner p-5 bg-white container-fluid">
-      <div className="grid p-5">
-        <div className="row">
-          <div className="col-md-6" style={{ overflow: 'hidden' }}>
-            <ListImageProduct
-              id={selectedProduct.idProductDetail}
-              style={{ maxWidth: '100%', height: 'auto' }}
-              maxHeight="1000px"
-            />
-          </div>
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="grid p-5">
+          <div className="row">
+            <div className="col-md-6" style={{ overflow: 'hidden' }}>
+              <ListImageProduct
+                id={idProduct}
+              />
+            </div>
 
-          <div className="product-detail__information col-md-6">
-            <h1 className="product-detail__name">{product?.nameProduct || ''}</h1>
-            <p className="product-detail__brand">
-              Thương hiệu: {product?.nameBrand || ""}
-            </p>
-            <div className="product-detail__price">
-              {sizeSelect && colorSelect ? (
-                selectedProduct?.idPromotion ? (
-                  <>
-                    <h2 className='text-danger'>
-                      {formatCurrency((selectedProduct.productDetailPrice || 0) * (1 - (selectedProduct.value / 100)))} VND
-                    </h2>
-                    <h2 className="text-decoration-line-through">
-                      {formatCurrency(selectedProduct.productDetailPrice || 0)} VND
-                    </h2>
-                  </>
-                ) : (
-                  selectedProduct ? (
-                    <h2 className="product-sale-price text-danger">
-                      {formatCurrency(selectedProduct?.productDetailPrice || 0)} VND
+            <div className="product-detail__information col-md-6">
+              <h1 className="product-detail__name">{product.nameProduct || 'N/A'}</h1>
+              <p className="product-detail__category">
+                Danh mục: {product.nameCategory || 'N/A'}
+              </p>
+
+              {/* Product pricing */}
+              <div className="product-detail__price">
+                {selectedProductUnit ? (
+                  product.priceBase === product.priceSale ? (
+                    <h2 className="product-price">
+                      {formatCurrency(product.priceBase * selectedProductUnit.conversionFactor)} VND
                     </h2>
                   ) : (
-                    <h2 className="product-sale-price">
-                      Sản Phẩm đã hết hàng
-                    </h2>
+                    <>
+                      <h2 className="product-sale-price text-danger">
+                        {formatCurrency(product.priceSale * selectedProductUnit.conversionFactor)} VND
+                      </h2>
+                      <h2 className="product-original-price text-decoration-line-through">
+                        {formatCurrency(product.priceBase * selectedProductUnit.conversionFactor)} VND
+                      </h2>
+                    </>
                   )
-
-                )
-              ) : (
-                product.minPriceAfterDiscount === product.minPrice && product.maxPriceAfterDiscount === product.maxPrice ? (
-                  <h2 className="product-price">{formatCurrency(product.minPrice)} VND</h2>
                 ) : (
-                  <>
-                    <h2 className="product-sale-price text-danger">
-                      {formatCurrency(product.minPriceAfterDiscount)} VND - {formatCurrency(product.maxPriceAfterDiscount)} VND
-                    </h2>
-                    <h2 className="product-original-price text-decoration-line-through">
-                      {formatCurrency(product.minPrice)} VND - {formatCurrency(product.maxPrice)} VND
-                    </h2>
-                  </>
-                )
-              )}
-            </div>
-            <div className="product-detail__select-watch">
-              <h3>Màu sắc</h3>
-              <ul>
-                {colors.map((color) => (
-                  <li key={color}>
-                    {colorSelect === color ? (
-                      <button type="button" className="btn btn-secondary position-relative" onClick={() => setColorSelect("")} >
-                        {color}
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                          <BsCheck size={14} />
-                        </span>
-                      </button>
-                    ) : (
-                      <button type="button" className="btn btn-secondary" onClick={() => setColorSelect(color)} disabled={disabledColors.includes(color)}>
-                        {color}
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="product-detail__select-watch">
-              <h3>Kích thước</h3>
-              <ul>
-                {sizes.map((size) => (
-                  <li key={size}>
-                    {sizeSelect === size ? (
-                      <button type="button" className="btn btn-primary position-relative" onClick={() => setSizeSelect("")}>
-                        {size}
-                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                          <BsCheck size={14} />
-                        </span>
-                      </button>
-                    ) : (
-                      <button type="button" className="btn btn-primary" onClick={() => setSizeSelect(size)} disabled={disabledSizes.includes(size)}>
-                        {size}
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="product-detail__select-watch select-number">
-              <h3>Số lượng:</h3>
-              <div>
-                <input
-                  type="number"
-                  min="1"
-                  max={selectedProduct?.quantityProductDetail || 1}
-                  value={numberSelect}
-                  onChange={(e) =>
-                    setNumberSelect(
-                      Math.min(Number(e.target.value), selectedProduct?.quantityProductDetail || 1)
-                    )
-                  }
-                />
+                  <h2 className="product-price">{formatCurrency(product.priceBase)} VND</h2>
+                )}
               </div>
-              <p style={{ paddingLeft: "20px" }}>
-                {selectedProduct?.quantityProductDetail && `Còn ${selectedProduct?.quantityProductDetail || 0} sản phẩm`}
-              </p>
-            </div>
 
-            <div className="product-detail-button mt-4">
-              <button
-                type="button"
-                className="btn btn-success"
-                disabled={!colorSelect || !sizeSelect || !numberSelect}
-                onClick={handleAddProductToCart}
-              >
-                Thêm vào giỏ hàng
-              </button>
-              <button
-                type="button"
-                className="btn primary btn-success"
-                disabled={!colorSelect || !sizeSelect || !numberSelect}
-                onClick={handlePayNow}
-              >
-                Mua ngay
-              </button>
-            </div>
+              {/* Product units selection */}
+              <div className="product-detail__select-watch">
+                <h3>Chọn loại:</h3>
+                <ul className="list-unstyled d-flex flex-wrap gap-2">
+                  {productUnits.length > 0 ? (
+                    productUnits.map((unit) => (
+                      <li key={unit.id}>
+                        <button
+                          type="button"
+                          className={`btn position-relative ${selectedProductUnit?.id === unit.id
+                            ? 'btn-primary'
+                            : 'btn-outline-secondary'
+                            }`}
+                          onClick={() => handleSelectedProductUnit(unit)}
+                          disabled={unit.status !== 'ACTIVE' || product.quantity < unit.conversionFactor}
+                        >
+                          {unit.unitName}
+                          {selectedProductUnit?.id === unit.id && (
+                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                              <BsCheck size={14} />
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    ))
+                  ) : (
+                    <li>Không có loại sản phẩm nào</li>
+                  )}
+                </ul>
+              </div>
 
-            <div className="product-detail__description">
+              {/* Quantity selection */}
+              <div className="product-detail__select-watch select-number mt-3">
+                <h3>Số lượng:</h3>
+                <div className="d-flex align-items-center gap-3">
+                  <input
+                    type="number"
+                    min="1"
+                    max={getMaxQuantity()}
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                    className="form-control w-25"
+                    disabled={!selectedProductUnit || product.quantity < selectedProductUnit.conversionFactor}
+                  />
+                  <p className="mb-0">
+                    {selectedProductUnit && product.quantity
+                      ? `Còn ${Math.floor(product.quantity / selectedProductUnit.conversionFactor)} sản phẩm`
+                      : 'Hết hàng'}
+                  </p>
+                </div>
+              </div>
 
+              {/* Action buttons */}
+              <div className="product-detail-button mt-4 d-flex gap-3">
+                <button
+                  type="button"
+                  className="btn btn-success flex-fill"
+                  disabled={!selectedProductUnit || quantity < 1 || product.quantity < selectedProductUnit.conversionFactor}
+                  onClick={handleAddProductToCart}
+                >
+                  Thêm vào giỏ hàng
+                </button>
+                {/* <button
+                  type="button"
+                  className="btn btn-primary flex-fill"
+                  disabled={!selectedProductUnit || quantity < 1 || product.quantity < selectedProductUnit.conversionFactor}
+                  onClick={handlePayNow}
+                >
+                  Mua ngay
+                </button> */}
+              </div>
+
+              <div className="product-detail__description mt-4">
+                {/* Thêm mô tả sản phẩm nếu cần */}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

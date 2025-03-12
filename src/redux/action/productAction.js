@@ -158,13 +158,13 @@ export const createNewNewProduct = (newProduct) => {
         }
     };
 };
-export const updateProduct = (updateProduct) => {
+export const updatePutProduct = (updateProduct) => {
     return async (dispatch) => {
         try {
             const response = await putUpdateProduct(updateProduct);
             if (response.status === 200) {
                 toast.success("Cập nhật sản phẩm thành công!");
-                return true; // Thành công
+                return true; 
             }
         } catch (error) {
             console.error("Lỗi khi cập nhật sản phẩm:", error);

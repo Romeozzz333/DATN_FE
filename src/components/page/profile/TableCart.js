@@ -90,7 +90,7 @@ const TableCart = () => {
                         currentItems.map((item, index) => (
                             <tr key={item.idBillDetail}>
                                 <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                <td><ListImageProduct id={item.idProductDetail} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                <td><ListImageProduct id={item?.idProductDetail} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                 <td>
                                     <div>
                                         {item.nameProduct}[{item.nameColor}-{item.nameSize}]

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Container, Row, Col, Button } from 'react-bootstrap';
 
-const ModelCreateUnit = ({ productUnits, setProductUnits }) => {
+const ModelCreateUnit = ({ productUnits, setProductUnits, idProductUnits, setIdProductUnits }) => {
     const [errors, setErrors] = useState(productUnits.map(() => ({})));
 
     // Hàm định dạng số với dấu chấm phân cách hàng nghìn
@@ -22,7 +22,7 @@ const ModelCreateUnit = ({ productUnits, setProductUnits }) => {
         }
 
         // Validate conversionFactor
-        const rawValue = unit.conversionFactor.replace(/\./g, ''); // Loại bỏ dấu chấm để kiểm tra số thực
+        const rawValue = String(unit.conversionFactor).replace(/\./g, '');
         const conversionFactor = parseFloat(rawValue);
         if (isNaN(conversionFactor)) {
             newErrors[index].conversionFactor = 'Giá trị quy đổi phải là số';
@@ -36,7 +36,7 @@ const ModelCreateUnit = ({ productUnits, setProductUnits }) => {
 
     // Hàm thêm mới một product unit
     const handleAddUnit = () => {
-        setProductUnits([...productUnits, { unitName: '', conversionFactor: '', type: false }]);
+        setProductUnits([...productUnits, { id: null, unitName: '', conversionFactor: '', type: false }]);
         setErrors([...errors, {}]);
     };
 
@@ -97,10 +97,13 @@ const ModelCreateUnit = ({ productUnits, setProductUnits }) => {
     };
 
     // Hàm xóa unit
-    const handleRemoveUnit = (index) => {
+    const handleRemoveUnit = (index, unit) => {
         if (productUnits.length > 1) {
             const newUnits = productUnits.filter((_, i) => i !== index);
             const newErrors = errors.filter((_, i) => i !== index);
+            if (unit?.id) {
+                setIdProductUnits([...idProductUnits, unit?.id]);
+            }
             setProductUnits(newUnits);
             setErrors(newErrors);
         }
@@ -166,7 +169,7 @@ const ModelCreateUnit = ({ productUnits, setProductUnits }) => {
                     <Col xs="auto">
                         <Button
                             variant="danger"
-                            onClick={() => handleRemoveUnit(index)}
+                            onClick={() => handleRemoveUnit(index, unit)}
                             disabled={productUnits.length === 1}
                             className="mt-4"
                         >

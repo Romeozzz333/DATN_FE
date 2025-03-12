@@ -122,7 +122,7 @@ const Content = () => {
                                 >
                                     <div className="image-container">
                                         <ListImageProduct
-                                            id={product.idProduct}
+                                            id={product?.idProduct}
                                         />
                                     </div>
                                 </Link>
@@ -190,7 +190,7 @@ const Content = () => {
                                 >
                                     <div className="image-container">
                                         <ListImageProduct
-                                            id={product.idProduct}
+                                            id={product?.idProduct}
                                         />
                                     </div>
                                 </Link>

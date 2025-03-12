@@ -1,198 +1,251 @@
 import { useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
-import './ModelUpdateProduct.scss';
-import InfoProduct from './InfoProduct';
 import { useSelector, useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
-import { findProductByIdProduct, updateProduct } from '../../../../../../redux/action/productAction'
-import { fetchAllProductDetail } from '../../../../../../redux/action/productDetailAction';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchAllProductProductDetail } from '../../../../../../redux/action/productAction'
-import AuthGuard from "../../../../../auth/AuthGuard";
-import RoleBasedGuard from "../../../../../auth/RoleBasedGuard";
+import { toast } from 'react-toastify';
 import swal from 'sweetalert';
+import Button from 'react-bootstrap/Button';
+import AuthGuard from '../../../../../auth/AuthGuard';
+import RoleBasedGuard from '../../../../../auth/RoleBasedGuard';
+import { updatePutProduct, fetchAllProductProductDetail } from '../../../../../../redux/action/productAction';
+import { findListProductUnitsByIdByIdProduct } from '../../../../../../Service/ApiProductUnitsService';
+import { findProductByIdProduct } from '../../../../../../redux/action/productAction'
+import InfoProduct from './InfoProduct';
+import ModelUpdateUntis from './ModelUpdateUntis';
+import './ModelUpdateProduct.scss';
+import { findListImageByIdProduct } from '../../../../../../Service/ApiProductImage';
+// Initial state cho product
+const initialProductState = {
+    id: null,
+    name: '',
+    pricePerBaseUnit: '',
+    quantity: '',
+    baseUnit: '',
+    idCategory: '',
+    listImages: [],
+};
+
 const ModelUpdateProduct = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
     const [searchParams] = useSearchParams();
-    const idProduct = searchParams.get('idProduct');
 
-    const productRedux = useSelector((state) => state.product.product);
-    const productDetailRedux = useSelector((state) => state.productDetail.listProductDetail);
+    const idProduct = searchParams.get('idProduct');
+    const productOld = useSelector((state) => state.product.product);
+    const [images, setImages] = useState([]);
+    const [product, setProduct] = useState(initialProductState);
+    const [idProductUnits, setIdProductUnits] = useState([]);
+    const [productUnits, setProductUnits] = useState([
+        {
+            id: null,
+            unitName: '',
+            conversionFactor: '',
+            type: false,
+        },
+    ]);
+    const [formErrors, setFormErrors] = useState({});
+
     useEffect(() => {
         if (idProduct) {
             getData(idProduct);
+            findProductUnits();
+            fetchImage();
         }
 
     }, [dispatch, idProduct]);
+
+    useEffect(() => {
+        if (productOld) {
+            setProduct({
+                id: productOld.id,
+                name: productOld.name,
+                pricePerBaseUnit: formatNumber(String(productOld.pricePerBaseUnit)),
+                quantity: productOld.quantity,
+                baseUnit: productOld.baseUnit,
+                idCategory: productOld.idCategory,
+                listImages: [],
+            });
+        }
+    }, [productOld]);
+    const formatNumber = (value) => {
+        if (!value) return '';
+        const cleanValue = value.replace(/[^0-9]/g, '');
+        return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
     const getData = (idProduct) => {
         if (idProduct) {
             dispatch(findProductByIdProduct(idProduct));
-            dispatch(fetchAllProductDetail([idProduct]))
         }
     }
-
-    useEffect(() => {
-        if (productRedux) setProduct(productRedux);
-
-        if (productDetailRedux) {
-            const initializedProductDetail = productDetailRedux.map((detail) => ({
-                ...detail,
-                listImage: Array.isArray(detail.listImage) ? detail.listImage : [], // Đảm bảo listImage là mảng
-                previewImages: Array.isArray(detail.previewImages) ? detail.previewImages : [], // Đảm bảo previewImages là mảng
-            }));
-            setProductDetail(initializedProductDetail);
+    const findProductUnits = async () => {
+        try {
+            const response = await findListProductUnitsByIdByIdProduct(idProduct);
+            if (response && response.status === 200) {
+                const data = response.data;
+                setProductUnits(
+                    data.map((unit) => ({
+                        id: unit.id,
+                        unitName: unit.unitName,
+                        conversionFactor: unit.conversionFactor,
+                        type: unit.type,
+                    }))
+                );
+            } else {
+                toast.error('Lỗi khi tải danh sách sản phẩm');
+            }
+        } catch (error) {
+            toast.error(error.message || 'Lỗi khi tải danh sách sản phẩm');
         }
-    }, [productRedux, productDetailRedux]);
-
-
-    const [product, setProduct] = useState({});
-    const [formErrors, setFormErrors] = useState({});
-
-    const [productDetail, setProductDetail] = useState([]);
-
-    const [selectedProductDetail, setSelectedProductDetail] = useState([]);
-    const isProductValid = () => {
-        // Danh sách các trường bắt buộc
-        const requiredFields = ["name", "idBrand", "idCategory", "idMaterial", "idShoeSole"];
-
-        // Kiểm tra nếu tất cả các trường trong product có giá trị hợp lệ
-        const isProductComplete = requiredFields.every((field) => {
-            const value = product[field];
-            return typeof value === "string" ? value.trim() : Boolean(value);
-        });
-
-        // Kiểm tra nếu formErrors không có lỗi nào
-        const hasNoErrors = Object.values(formErrors).every((error) => !error);
-
-        return isProductComplete && hasNoErrors;
+    };
+    const fetchImage = async () => {
+        try {
+            const response = await findListImageByIdProduct(idProduct);
+            setImages(response.data);
+        } catch (error) {
+            console.error("Error fetching image:", error);
+        }
     };
 
-    useEffect(() => {
-        setSelectedProductDetail([])
-    }, [product, formErrors]);
+    // Validate product
+    const validateProduct = (productData) => {
+        const errors = {};
 
-    const validateNewProduct = (newProduct) => {
-        // Kiểm tra các trường dữ liệu quan trọng
-        if (!newProduct.name || newProduct.name.trim() === "") {
-            toast.error("Tên sản phẩm là bắt buộc");
+        if (!productData.name?.trim()) {
+            toast.error('Tên sản phẩm là bắt buộc');
             return false;
         }
-        if (!newProduct.idBrand) {
-            toast.error("Thương hiệu sản phẩm là bắt buộc");
+        if (!productData.idCategory) {
+            toast.error('Danh mục sản phẩm là bắt buộc');
             return false;
         }
-        if (!newProduct.idCategory) {
-            toast.error("Danh mục sản phẩm là bắt buộc");
-            return false;
-        }
-        if (!newProduct.idMaterial) {
-            toast.error("Chất liệu sản phẩm là bắt buộc");
-            return false;
-        }
-        if (!newProduct.idShoeSole) {
-            toast.error("Đế giày sản phẩm là bắt buộc");
+        if (!productData.baseUnit?.trim()) {
+            toast.error('Tên đơn vị gốc là bắt buộc');
             return false;
         }
 
-        // Kiểm tra image nếu là chuỗi
-        if (typeof newProduct.image === "string" && newProduct.image.trim() === "") {
-            toast.error("Ảnh sản phẩm là bắt buộc");
+        const priceStr = String(productData.pricePerBaseUnit ?? '').replace(/\./g, '');
+        if (!priceStr) {
+            toast.error('Giá là bắt buộc');
+            return false;
+        }
+        if (isNaN(priceStr) || Number(priceStr) <= 0) {
+            toast.error('Giá là số dương');
             return false;
         }
 
-        // Nếu image là mảng (binary data), kiểm tra xem mảng có dữ liệu không
-        if (Array.isArray(newProduct.image) && newProduct.image.length === 0) {
-            toast.error("Ảnh sản phẩm là bắt buộc");
+        const quantityStr = String(productData.quantity ?? '').replace(/\./g, '');
+        if (!quantityStr) {
+            toast.error('Số lượng là bắt buộc');
+            return false;
+        }
+        if (isNaN(quantityStr) || Number(quantityStr) <= 0) {
+            toast.error('Số lượng phải là số dương');
             return false;
         }
 
-
-        // Nếu tất cả các trường đều hợp lệ
+        setFormErrors(errors);
         return true;
     };
 
+
+    // Validate productUnits
+    const validateProductUnits = () => {
+        const errors = {};
+        // Kiểm tra nếu productUnits rỗng
+        if (!productUnits || productUnits.length === 0) {
+            toast.error('Phải có ít nhất một đơn vị sản phẩm')
+            return false;
+        }
+        // Kiểm tra từng unit
+        productUnits.forEach((unit, index) => {
+            if (!unit.unitName?.trim()) {
+                toast.error(`Tên đơn vị ${index + 1} là bắt buộc`)
+                return false;
+            }
+            if (!unit.conversionFactor || isNaN(unit.conversionFactor) || Number(unit.conversionFactor) <= 0) {
+                toast.error(`Giá trị quy đổi ${index + 1} phải là số dương`)
+                return false;
+            }
+        });
+        setFormErrors((prevErrors) => ({ ...prevErrors, ...errors }));
+        return true;
+    };
+
+    // Check if product and productUnits are valid
+    const isFormValid = () => {
+        const isProductValid = validateProduct(product);
+        const areUnitsValid = validateProductUnits();
+        return isProductValid && areUnitsValid;
+    };
+
+    // Handle submit
     const handleSubmitUpdate = async () => {
         try {
-            const updateProductRequest = {
-                id: idProduct,
+            const updateProduct = {
+                id: product.id,
                 name: product.name,
-                gender: product.gender,
-                idBrand: product.idBrand,
+                pricePerBaseUnit: String(product.pricePerBaseUnit).replace(/\./g, ""),
+                quantity: product.quantity,
+                baseUnit: product.baseUnit,
                 idCategory: product.idCategory,
-                idMaterial: product.idMaterial,
-                idShoeSole: product.idShoeSole,
-                image: product.image,
-                productDetailRequest: selectedProductDetail
+                listImages: product.listImages,
             };
-            if (validateNewProduct(updateProductRequest)) {
-                // Hiển thị thông báo xác nhận trước khi thực hiện cập nhật
-                const confirm = await swal({
-                    title: "Xác nhận cập nhật",
-                    text: selectedProductDetail.length > 0
-                        ? `Bạn đã chọn ${selectedProductDetail.length} sản phẩm chi tiết. Bạn có chắc chắn muốn cập nhật?`
-                        : "Hiện tại bạn chưa chọn sản phẩm chi tiết. Bạn có chắc chắn muốn cập nhật?",
-                    icon: "warning",
-                    buttons: ["Hủy bỏ", "Xác nhận"],
-                    dangerMode: true,
-                });
+            const updateProductRequest = {
+                productRequest: { ...updateProduct, productUnits },
+                idProductUnits: idProductUnits
+            }
+            // Validate before submit
+            if (!isFormValid()) {
+                swal('Lỗi dữ liệu', 'Thông tin sản phẩm hoặc đơn vị không hợp lệ. Vui lòng kiểm tra lại.', 'error');
+                return;
+            }
+            // Confirm before creating
+            const willCreate = await swal({
+                title: 'Xác nhận',
+                text: 'Bạn có chắc chắn muốn tạo sản phẩm này không?',
+                icon: 'warning',
+                buttons: ['Hủy', 'Đồng ý'],
+                dangerMode: true,
+            });
 
-                if (!confirm) {
-                    return; // Nếu người dùng chọn "Hủy bỏ", dừng thực hiện
-                }
+            if (willCreate) {
 
-                const isSuccess = await dispatch(updateProduct(updateProductRequest));
-
-                if (isSuccess) {
-                    await swal({
-                        title: "Thành công",
-                        text: "Sản phẩm đã được cập nhật thành công.",
-                        icon: "success",
-                        button: "OK",
-                    });
-
+                const isSuccess = await dispatch(updatePutProduct(updateProductRequest));
+                if (isSuccess === true) {
+                    swal('Thành công', 'Sản phẩm đã được update thành công!', 'success');
                     dispatch(fetchAllProductProductDetail());
                     navigate('/admins/manage-product');
                 } else {
-                    await swal({
-                        title: "Thất bại",
-                        text: "Cập nhật sản phẩm không thành công. Vui lòng thử lại.",
-                        icon: "error",
-                        button: "OK",
-                    });
+                    swal('Thất bại', 'Không thể tạo sản phẩm. Vui lòng thử lại.', 'error');
                 }
             }
         } catch (error) {
-            await swal({
-                title: "Lỗi",
-                text: "Lỗi khi cập nhật sản phẩm. Vui lòng thử lại sau.",
-                icon: "error",
-                button: "OK",
-            });
+            console.error('Error creating product:', error);
+            swal('Lỗi hệ thống', 'Đã xảy ra lỗi trong quá trình thêm sản phẩm. Vui lòng thử lại sau.', 'error');
         }
     };
+
     return (
         <AuthGuard>
-            <RoleBasedGuard accessibleRoles={["ADMIN"]}>
-                <div className="model-create-product container-fluid" >
+            <RoleBasedGuard accessibleRoles={['ADMIN']}>
+                <div className="model-create-product container-fluid">
                     <div className="model-create-product-info p-3 m-3">
-                        <h4 className="text-center p-3">Cập nhật sản phẩm</h4>
+                        <h4 className="text-center p-3">Thêm sản phẩm</h4>
                         <InfoProduct
                             product={product}
                             setProduct={setProduct}
                             formErrors={formErrors}
-                            setFormErrors={setFormErrors} />
+                            setFormErrors={setFormErrors}
+                            handleSubmitUpdate={handleSubmitUpdate}
+                            images={images}
+                        />
                     </div>
-
                     <div className="model-create-product-sizecolor p-3 m-3">
-                        <h4 className="text-center p-3">Thông tin đơn vị quy đổi</h4>
-                        {/* <ModelDetailUntis idProduct={idProduct} /> */}
+                        {productUnits && <ModelUpdateUntis productUnits={productUnits} setProductUnits={setProductUnits} formErrors={formErrors} idProductUnits={idProductUnits} setIdProductUnits={setIdProductUnits} />}
                     </div>
                 </div>
             </RoleBasedGuard>
         </AuthGuard>
     );
-}
+};
 
 export default ModelUpdateProduct;

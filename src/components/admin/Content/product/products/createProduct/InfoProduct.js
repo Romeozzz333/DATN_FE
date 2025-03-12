@@ -35,6 +35,13 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
         const cleanValue = value.replace(/[^0-9]/g, '');
         return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
+    const formatQuantity = (value) => {
+        if (!value) return '';
+
+        const cleanValue = value.replace(/[^0-9.]/g, '');
+
+        return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
 
     const parseNumber = (formattedValue) => {
         return formattedValue.replace(/\./g, '');
@@ -64,10 +71,10 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                 errors[fieldName] = fieldValue.trim() ? null : errorMessages[fieldName] + " là bắt buộc";
             } else if (fieldName === "quantity") {
                 const numericValue = parseNumber(fieldValue);
+                const num = Number(numericValue);
                 if (!numericValue) {
                     errors[fieldName] = errorMessages[fieldName] + " là bắt buộc";
-                } else {
-                    const num = Number(numericValue);
+                } else if (!num) {
                     if (isNaN(num)) {
                         errors[fieldName] = "Số lượng phải là một số hợp lệ";
                     } else if (num < 1) {
@@ -75,6 +82,8 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                     } else if (num > 100000) {
                         errors[fieldName] = "Số lượng không được vượt quá 100.000";
                     }
+                } else {
+                    errors[fieldName] = null;
                 }
             } else if (fieldName === "idCategory") {
                 // Chỉ kiểm tra xem đã chọn danh mục hay chưa
@@ -91,8 +100,20 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        if (name === 'pricePerBaseUnit' || name === 'quantity') {
+        if (name === 'pricePerBaseUnit') {
             const formattedValue = formatNumber(value);
+            setProduct((prev) => ({
+                ...prev,
+                [name]: formattedValue,
+            }));
+
+            const newError = validateForm(name, formattedValue);
+            setFormErrors((prev) => ({
+                ...prev,
+                ...newError,
+            }));
+        } else if (name === 'quantity') {
+            const formattedValue = formatQuantity(value);
             setProduct((prev) => ({
                 ...prev,
                 [name]: formattedValue,
@@ -120,8 +141,20 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
     const handleBlur = (e) => {
         const { name, value } = e.target;
 
-        if (name === 'pricePerBaseUnit' || name === 'quantity') {
+        if (name === 'pricePerBaseUnit') {
             const formattedValue = formatNumber(value);
+            setProduct((prev) => ({
+                ...prev,
+                [name]: formattedValue,
+            }));
+
+            const newError = validateForm(name, formattedValue);
+            setFormErrors((prev) => ({
+                ...prev,
+                ...newError,
+            }));
+        } else if (name === 'quantity') {
+            const formattedValue = formatQuantity(value);
             setProduct((prev) => ({
                 ...prev,
                 [name]: formattedValue,
