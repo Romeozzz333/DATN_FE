@@ -143,11 +143,6 @@ const ModelCreateProduct = () => {
                 } else {
                     swal('Thất bại', 'Không thể tạo sản phẩm. Vui lòng thử lại.', 'error');
                 }
-
-                // For testing purposes
-                console.log('New Product:', newProduct);
-                console.log('Product Units:', productUnits);
-                swal('Thành công', 'Sản phẩm đã được tạo thành công!', 'success');
             }
         } catch (error) {
             console.error('Error creating product:', error);

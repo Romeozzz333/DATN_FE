@@ -103,7 +103,7 @@ const InfoProduct = ({ product }) => {
                     className="d-flex justify-content-center align-items-center"
                 >
                     <ListImageProduct
-                        id={product.id}
+                        id={product?.id}
                         maxWidth="100%" // Chiếm toàn bộ chiều rộng của Col
                         maxHeight="1000px" // Giới hạn chiều cao tối đa
                         containerClassName="product-image-container"

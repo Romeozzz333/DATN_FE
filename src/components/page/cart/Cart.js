@@ -457,7 +457,7 @@ const Cart = () => {
                                             <th scope="row" className="text-center align-middle">{index + 1}</th>
                                             <td className="d-flex justify-content-center align-items-center">
                                                 <ListImageProduct
-                                                    id={item.idProduct}
+                                                    id={item?.idProduct}
                                                     maxWidth={'100px'}
                                                     maxHeight={'100px'}
                                                     containerClassName="product-image-container"

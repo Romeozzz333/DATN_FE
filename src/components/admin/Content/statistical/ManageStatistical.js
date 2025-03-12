@@ -295,7 +295,7 @@ const ManageStatistical = () => {
                                                 currentItems2.map((item, index) => (
                                                     <tr key={item.id || index}>
                                                         <td>{index + 1 + (currentPage2 - 1) * itemsPerPage}</td>
-                                                        <td><ListImageProduct id={item.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                                        <td><ListImageProduct id={item?.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
 
                                                         <td>{item.nameProduct}</td>
                                                         <td>{item.quantity}</td>

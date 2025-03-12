@@ -80,7 +80,7 @@ const TableProductDetail = () => {
                             currentItems.map((item, index) => (
                                 <tr key={item.idPromotionDetail}>
                                     <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                    <td><ListImageProduct id={item.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                    <td><ListImageProduct id={item?.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                     <td>{item.nameProduct}</td>
                                     <td>{item.quantityProduct} {item.baseUnit}</td>
                                     <td>{item.quantityPromotionDetail} {item.baseUnit}</td>

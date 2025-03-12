@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { findListImageByIdProductDetail } from '../Service/ApiProductImage';
+import { findListImageByIdProduct } from '../Service/ApiProductImage';
 
 const ListImageProduct = ({
     id,
@@ -14,7 +14,7 @@ const ListImageProduct = ({
     useEffect(() => {
         const fetchImage = async () => {
             try {
-                const response = await findListImageByIdProductDetail(id);
+                const response = await findListImageByIdProduct(id);
                 setImages(response.data || []);
             } catch (error) {
                 console.error('Error fetching image:', error);

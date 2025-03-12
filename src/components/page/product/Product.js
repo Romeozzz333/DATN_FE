@@ -204,7 +204,7 @@ const Product = () => {
                       <Link to={`/product-detail?idProduct=${product.idProduct}`} className="w-100">
                         <div className="card product-card h-100">
                           <div className="image-container">
-                            <ListImageProduct id={product.idProduct} />
+                            <ListImageProduct id={product?.idProduct} />
                           </div>
                           <div className="card-body text-center">
                             <OverlayTrigger

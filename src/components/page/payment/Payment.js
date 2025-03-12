@@ -426,7 +426,7 @@ const Payment = () => {
                                 <tr>
                                     <td rowSpan="4" className="product-image-cell">
                                         <ListImageProduct
-                                            id={item.idProductDetail}
+                                            id={item?.idProductDetail}
                                             maxWidth="150px"
                                             maxHeight="150px"
                                         />
