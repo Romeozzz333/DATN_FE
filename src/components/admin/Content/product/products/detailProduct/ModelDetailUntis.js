@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Container, Row, Col, Button } from 'react-bootstrap';
 import { toast } from 'react-toastify';
-import { findProductUnitsByIdProduct } from '../../../../../../Service/ApiProductUnitsService';
+import { findListProductUnitsByIdByIdProduct } from '../../../../../../Service/ApiProductUnitsService';
 const ModelDetailUnit = ({ idProduct }) => {
     const [productUnits, setProductUnits] = useState();
     const findProductUnits = async () => {
         try {
-            const response = await findProductUnitsByIdProduct(idProduct);
+            const response = await findListProductUnitsByIdByIdProduct(idProduct);
             if (response && response.status === 200) {
                 setProductUnits(response.data);
             } else {

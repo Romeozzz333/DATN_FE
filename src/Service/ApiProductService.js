@@ -64,6 +64,10 @@ const getAllPriceRangePromotion = async () => {
     return response;
 
 };
+const findListPayProduct = async (productDetailRequest) => {
+    const response = await authorizeAxiosInstance.post(`/product/listPayProduct`, productDetailRequest)
+    return response;
+};
 export async function getProductNameByIds(listId) {
     try {
         let response = await authorizeAxiosInstance.post("/product/get-name-product-by-id", listId);
@@ -84,5 +88,6 @@ export {
     filterProductProductDetailResponse,
     findProductResponseById,
     putUpdateProduct,
-    getAllPriceRangePromotion
+    getAllPriceRangePromotion,
+    findListPayProduct
 };

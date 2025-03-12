@@ -11,39 +11,39 @@ import { CiCircleMinus, CiCirclePlus } from "react-icons/ci";
 import ListImageProduct from '../../../image/ListImageProduct';
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { plusCartDetail, subtractCartDetail, deleteCartDetail } from '../../../Service/ApiCartSevice'
-import { findListPayProductDetail } from '../../../Service/ApiProductDetailService';
+import { findListPayProduct } from '../../../Service/ApiProductService';
 import { createCartDetailByCartLocal } from '../../../Service/ApiCartSevice';
 import { getAccountLogin } from "../../../Service/ApiAccountService";
 import { initialize } from '../../../redux/action/authAction';
-import { getCart, updateCartWithExpiration, deleteProductDetailToCart, plusProductDetailToCart, subtractProductDetailToCart } from '../../managerCartLocal/CartManager'
+import { getCart, updateCartWithExpiration, deleteProductToCart, plusProductToCart, subtractProductToCart } from '../../managerCartLocal/CartManager'
 import EventListener from '../../../event/EventListener'
 const Cart = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [totalCartPrice, setTotalCartPrice] = useState(0);
     const [selectedCartDetails, setSelectedCartDetails] = useState([]);
-    const [selectedProductDetails, setSelectedProductDetails] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState([]);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [cartDetails, setCartDetails] = useState([]);
     const [user, setUser] = useState(null);
     const CART_KEY = "cartLocal";
     const checkLogin = async () => {
         setSelectedCartDetails([]);
-        setSelectedProductDetails([]);
+        setSelectedProduct([]);
         const token = localStorage.getItem('accessToken');
         if (!token) {
             try {
                 if (getCart().items && getCart().items.length > 0) {
                     try {
-                        let response = await findListPayProductDetail(getCart().items);
+                        let response = await findListPayProduct(getCart().items);
                         if (response.status === 200) {
                             const validProducts = response.data?.filter((product) => !product.error);
                             setCartDetails(validProducts);
-                            const productDetailPromoRequests = validProducts.map((product) => ({
-                                idProductDetail: product.idProductDetail,
+                            const productPromoRequests = validProducts.map((product) => ({
+                                idProduct: product.idProduct,
                                 quantity: product.quantityBuy,
                             }));
-                            updateCartWithExpiration(productDetailPromoRequests);
+                            updateCartWithExpiration(productPromoRequests);
                             const invalidProducts = response.data?.filter((product) => product.error);
                             invalidProducts.forEach((product) => {
                                 toast.error(product.error);
@@ -76,10 +76,10 @@ const Cart = () => {
                                 try {
                                     const response = await createCartDetailByCartLocal(item, data.id);
                                     if (response.status === 200) {
-                                        await deleteProductDetailToCart(item.idProductDetail);
+                                        await deleteProductToCart(item.idProduct);
                                     }
                                 } catch (error) {
-                                    console.log(error);
+                                    console.error(error);
                                 }
                             }
                         }
@@ -89,7 +89,7 @@ const Cart = () => {
                             setCartDetails(response.data);
                         }
                     } catch (error) {
-                        // window.location.href = "/cart";
+                        window.location.href = "/cart";
                         console.error(error);
                     }
                     setUser(data);
@@ -114,13 +114,13 @@ const Cart = () => {
     useEffect(() => {
         const totalPrice = calculateTotalCartPriceForSelected();
         setTotalCartPrice(totalPrice);
-    }, [selectedCartDetails, selectedProductDetails, cartDetails]);
+    }, [selectedCartDetails, selectedProduct, cartDetails]);
 
     const calculateTotalCartPriceForSelected = () => {
 
         // Lọc các sản phẩm được chọn từ cartDetails
         let selectedProducts = cartDetails.filter(product =>
-            selectedProductDetails.some(selected => selected.idProductDetail === product.idProductDetail)
+            selectedProduct.some(selected => selected.idProduct === product.idProduct)
         );
         if (user) {
             selectedProducts = cartDetails.filter(product =>
@@ -128,8 +128,8 @@ const Cart = () => {
             );
         }
         // Tính tổng giá các sản phẩm được chọn
-        return selectedProducts.reduce((total, productDetail) => {
-            return total + calculatePricePerProductDetail(productDetail);
+        return selectedProducts.reduce((total, product) => {
+            return total + calculatePricePerProduct(product);
         }, 0);
     };
 
@@ -156,10 +156,10 @@ const Cart = () => {
                 toast.error("Bạn chưa chọn sản phẩm cần thanh toán");
             }
         } else {
-            if (selectedProductDetails.length > 0) {
+            if (selectedProduct.length > 0) {
                 const cartItems = getCart().items;
                 const filteredItems = cartItems.filter(item =>
-                    selectedProductDetails.some(selected => selected.idProductDetail === item.idProductDetail)
+                    selectedProduct.some(selected => selected.idProduct === item.idProduct)
                 );
                 navigate(`/Payment`, {
                     state: {
@@ -174,30 +174,30 @@ const Cart = () => {
         }
     };
 
-    const calculatePricePerProductDetail = (productDetail) => {
-        const { productDetailPrice, quantityCartDetail, quantityBuy, quantityPromotionDetail, value } = productDetail;
+    const calculatePricePerProduct = (product) => {
+        const { pricePerBaseUnit, quantityCartDetail, quantityBuy, quantityPromotionDetail, value } = product;
         const quantity = user ? quantityCartDetail : quantityBuy;
         if (!value) {
             // Nếu không có khuyến mãi
-            return productDetailPrice * quantity;
+            return pricePerBaseUnit * quantity;
         } else if (quantity <= quantityPromotionDetail) {
             // Nếu có khuyến mãi và số lượng trong giỏ <= số lượng được áp dụng khuyến mãi
-            return productDetailPrice * (1 - value / 100) * quantity;
+            return pricePerBaseUnit * (1 - value / 100) * quantity;
         } else {
             // Nếu có khuyến mãi và số lượng trong giỏ > số lượng được áp dụng khuyến mãi
             return (
-                productDetailPrice * (1 - value / 100) * quantityPromotionDetail +
-                productDetailPrice * (quantity - quantityPromotionDetail)
+                pricePerBaseUnit * (1 - value / 100) * quantityPromotionDetail +
+                pricePerBaseUnit * (quantity - quantityPromotionDetail)
             );
         }
     };
-    const saleProductDetail = (productDetail) => {
-        const { productDetailPrice, value } = productDetail;
+    const saleProduct = (product) => {
+        const { pricePerBaseUnit, value } = product;
         if (!value) {
             // Nếu không có khuyến mãi
-            return productDetailPrice;
+            return pricePerBaseUnit;
         } else {
-            return productDetailPrice * (1 - value / 100);
+            return pricePerBaseUnit * (1 - value / 100);
         }
     }
     // Handle checkbox for all products  
@@ -213,10 +213,10 @@ const Cart = () => {
             }
         } else {
             if (isChecked) {
-                const allProductDetail = cartDetails.map(item => ({ idProductDetail: item.idProductDetail }));
-                setSelectedProductDetails(allProductDetail);
+                const allProduct = cartDetails.map(item => ({ idProduct: item.idProduct }));
+                setSelectedProduct(allProduct);
             } else {
-                setSelectedProductDetails([]);
+                setSelectedProduct([]);
             }
         }
 
@@ -233,9 +233,9 @@ const Cart = () => {
             }
         } else {
             if (isChecked) {
-                setSelectedProductDetails((prev) => [...prev, { idProductDetail: id }]);
+                setSelectedProduct((prev) => [...prev, { idProduct: id }]);
             } else {
-                setSelectedProductDetails((prev) => prev.filter(cartDetails => cartDetails.idProductDetail !== id));
+                setSelectedProduct((prev) => prev.filter(cartDetails => cartDetails.idProduct !== id));
             }
         }
     };
@@ -248,6 +248,7 @@ const Cart = () => {
                         const updatedCart = await getCartDetailByAccountId(user.id);
                         if (updatedCart.status === 200) {
                             setCartDetails(updatedCart.data);
+                            setIsAllChecked(false);
                         }
                     } catch (error) {
                         window.location.href = "/cart";
@@ -270,6 +271,7 @@ const Cart = () => {
                         const updatedCart = await getCartDetailByAccountId(user.id);
                         if (updatedCart.status === 200) {
                             setCartDetails(updatedCart.data);
+                            setIsAllChecked(false);
                         }
                     } catch (error) {
                         window.location.href = "/cart";
@@ -292,6 +294,7 @@ const Cart = () => {
                         const updatedCart = await getCartDetailByAccountId(user.id);
                         if (updatedCart.status === 200) {
                             setCartDetails(updatedCart.data);
+                            setIsAllChecked(false);
                         }
                     } catch (error) {
                         window.location.href = "/cart";
@@ -308,8 +311,9 @@ const Cart = () => {
     const handleDeleteByIdCartDetail = async (idProduct) => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            await deleteProductDetailToCart(idProduct);
+            await deleteProductToCart(idProduct);
             checkLogin();
+            setIsAllChecked(false);
             toast.error("Xóa thành công!")
         } else {
             try {
@@ -335,9 +339,10 @@ const Cart = () => {
     const handleDecreaseQuantity = async (idProduct) => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            const isSuccess = await subtractProductDetailToCart(idProduct);
+            const isSuccess = await subtractProductToCart(idProduct);
             if (isSuccess) {
                 checkLogin();
+                setIsAllChecked(false);
                 toast.success("Trừ số lượng thành công!");
             } else {
                 toast.error("Trừ số lượng bại!");
@@ -366,9 +371,10 @@ const Cart = () => {
     const handleIncreaseQuantity = async (idProduct) => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
-            const isSuccess = await plusProductDetailToCart(idProduct);
+            const isSuccess = await plusProductToCart(idProduct);
             if (isSuccess) {
                 checkLogin();
+                setIsAllChecked(false);
                 toast.success("Thêm thành công!");
             } else {
                 toast.error("Thêm thất bại!");
@@ -398,7 +404,7 @@ const Cart = () => {
         if (user) {
             return selectedCartDetails.some(cartDetails => cartDetails.idCartDetail === item.idCartDetail);
         } else {
-            return selectedProductDetails.some(cartDetails => cartDetails.idProductDetail === item.idProductDetail);
+            return selectedProduct.some(cartDetails => cartDetails.idProduct === item.idProduct);
         }
     };
     const handlers = {
@@ -412,7 +418,7 @@ const Cart = () => {
     });
     return (
         <div id="cart" className="inner m-5 p-5">
-            {/* <EventListener handlers={handlers} /> */}
+            <EventListener handlers={handlers} />
             <h1 className="cart-title">GIỎ HÀNG</h1>
             {cartDetails && cartDetails.length > 0 ? (
                 <div className="row">
@@ -421,7 +427,7 @@ const Cart = () => {
                             <table className="table">
                                 <thead>
                                     <tr>
-                                        <th>
+                                        <th className='text-center'>
                                             <Form.Check
                                                 type="checkbox"
                                                 id="flexCheckAll"
@@ -429,37 +435,43 @@ const Cart = () => {
                                                 onChange={handleCheckAll}
                                             />
                                         </th>
-                                        <th scope="col">#</th>
-                                        <th scope="col">Ảnh</th>
-                                        <th scope="col">Sản phẩm</th>
+                                        <th className='text-center'>#</th>
+                                        <th className='text-center'>Ảnh</th>
+                                        <th className='text-center'>Sản phẩm</th>
                                         <th className='text-center'>Giá</th>
                                         <th className='text-center'>Số lượng</th>
-                                        <th scope="col">Thao tác</th>
+                                        <th className='text-center'>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody className="cart-list">
                                     {cartDetails.map((item, index) => (
-                                        <tr key={user ? item.idCartDetail : item.idProductDetail}>
-                                            <td>
+                                        <tr key={user ? item.idCartDetail : item.idProduct}>
+                                            <td className="text-center align-middle">
                                                 <Form.Check
                                                     type="checkbox"
-                                                    id={`flexCheckCartDetails-${user ? item.idCartDetail : item.idProductDetail}`} // Fixed id syntax  
+                                                    id={`flexCheckCartDetails-${user ? item.idCartDetail : item.idProduct}`} // Fixed id syntax  
                                                     checked={checkBox(item)} // Check for inclusion correctly  
-                                                    onChange={(event) => handleCheckProduct(event, user ? item.idCartDetail : item.idProductDetail)}
+                                                    onChange={(event) => handleCheckProduct(event, user ? item.idCartDetail : item.idProduct)}
                                                 />
                                             </td>
-                                            <th scope="row">{index + 1}</th>
-                                            <td><ListImageProduct id={item.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
-                                            <td>
-                                                {item.nameProduct}
-                                                <br></br>
-                                                <span style={{ fontSize: "16px", color: "#333333" }}>Màu: {item.nameColor}</span> -
-                                                <span style={{ fontSize: "16px", color: "#333333" }}>  Size: {item.nameSize}</span>
+                                            <th scope="row" className="text-center align-middle">{index + 1}</th>
+                                            <td className="d-flex justify-content-center align-items-center">
+                                                <ListImageProduct
+                                                    id={item.idProduct}
+                                                    maxWidth={'100px'}
+                                                    maxHeight={'100px'}
+                                                    containerClassName="product-image-container"
+                                                    imageClassName="product-image"
+                                                    center={true} // Căn giữa
+                                                />
                                             </td>
-                                            <td>{formatCurrency(saleProductDetail(item))} VND</td>
-                                            <td className="text-center">
+                                            <td className="text-center align-middle">
+                                                {item.nameProduct} ({item.baseUnit})
+                                            </td>
+                                            <td className="text-center align-middle">{formatCurrency(saleProduct(item))} VND</td>
+                                            <td className="text-center align-middle">
                                                 <div className="d-flex justify-content-center align-items-center">
-                                                    <CiCircleMinus className="me-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleDecreaseQuantity(user ? item.idCartDetail : item.idProductDetail)} />
+                                                    <CiCircleMinus className="me-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleDecreaseQuantity(user ? item.idCartDetail : item.idProduct)} />
                                                     <OverlayTrigger
                                                         placement="top"
                                                         overlay={<Tooltip>Giá trị hiện tại là {user ? item.quantityCartDetail : item.quantityBuy}</Tooltip>}
@@ -473,11 +485,11 @@ const Cart = () => {
                                                             style={{ width: `${Math.max(5, String(user ? item.quantityCartDetail : item.quantityBuy).length)}ch`, fontSize: '1.25rem' }}
                                                         />
                                                     </OverlayTrigger>
-                                                    <CiCirclePlus className="ms-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleIncreaseQuantity(user ? item.idCartDetail : item.idProductDetail)} />
+                                                    <CiCirclePlus className="ms-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleIncreaseQuantity(user ? item.idCartDetail : item.idProduct)} />
                                                 </div>
                                             </td>
 
-                                            <td className='text-center'><MdOutlineDeleteForever className='text-danger' size={'30px'} onClick={() => handleDeleteByIdCartDetail(user ? item.idCartDetail : item.idProductDetail)} /></td>
+                                            <td className="text-center align-middle"><MdOutlineDeleteForever className='text-danger' size={'30px'} onClick={() => handleDeleteByIdCartDetail(user ? item.idCartDetail : item.idProduct)} /></td>
                                         </tr>
                                     ))}
                                 </tbody>

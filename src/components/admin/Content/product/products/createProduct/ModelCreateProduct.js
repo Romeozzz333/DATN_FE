@@ -52,19 +52,19 @@ const ModelCreateProduct = () => {
             toast.error('Tên đơn vị gốc là bắt buộc')
             return false;
         }
-        if (!productData.pricePerBaseUnit) {
+        if (!productData.pricePerBaseUnit.replace(/\./g, "")) {
             toast.error('Giá là bắt buộc')
             return false;
         }
-        if (isNaN(productData.pricePerBaseUnit) || Number(productData.pricePerBaseUnit) <= 0) {
+        if (isNaN(productData.pricePerBaseUnit.replace(/\./g, "")) || Number(productData.pricePerBaseUnit.replace(/\./g, "")) <= 0) {
             toast.error('Giá là số dương')
             return false;
         }
-        if (!productData.quantity) {
+        if (!productData.quantity.replace(/\./g, "")) {
             toast.error('Số lượng là bắt buộc')
             return false;
         }
-        if (isNaN(productData.quantity) || Number(productData.quantity) <= 0) {
+        if (isNaN(productData.quantity.replace(/\./g, "")) || Number(productData.quantity.replace(/\./g, "")) <= 0) {
             toast.error('Số lượng là số dương')
             return false;
         }
@@ -104,7 +104,6 @@ const ModelCreateProduct = () => {
     const isFormValid = () => {
         const isProductValid = validateProduct(product);
         const areUnitsValid = validateProductUnits();
-        console.log("isProductValid", isProductValid, "areUnitsValid", areUnitsValid)
         return isProductValid && areUnitsValid;
     };
 
@@ -113,7 +112,7 @@ const ModelCreateProduct = () => {
         try {
             const newProduct = {
                 name: product.name,
-                pricePerBaseUnit: product.pricePerBaseUnit,
+                pricePerBaseUnit: product.pricePerBaseUnit.replace(/\./g, ""),
                 quantity: product.quantity,
                 baseUnit: product.baseUnit,
                 idCategory: product.idCategory,
@@ -125,7 +124,6 @@ const ModelCreateProduct = () => {
                 swal('Lỗi dữ liệu', 'Thông tin sản phẩm hoặc đơn vị không hợp lệ. Vui lòng kiểm tra lại.', 'error');
                 return;
             }
-
             // Confirm before creating
             const willCreate = await swal({
                 title: 'Xác nhận',

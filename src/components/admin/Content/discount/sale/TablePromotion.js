@@ -50,13 +50,13 @@ const TablePromotion = ({ filteredAccounts }) => {
   const showStatus = (status) => {
     switch (status) {
       case 'UPCOMING':
-        return <td><span class="badge text-bg-info">Sắp diễn ra</span></td>;
+        return <td><span className="badge text-bg-info">Sắp diễn ra</span></td>;
       case 'ONGOING':
-        return <td><span class="badge text-bg-primary">Đang diễn ra</span></td>;
+        return <td><span className="badge text-bg-primary">Đang diễn ra</span></td>;
       case 'FINISHED':
-        return <td><span class="badge text-bg-danger">Kết thúc</span></td>;
+        return <td><span className="badge text-bg-danger">Kết thúc</span></td>;
       case 'ENDING_SOON':
-        return <td><span class="badge text-bg-warning">Kết thúc sớm</span></td>;
+        return <td><span className="badge text-bg-warning">Kết thúc sớm</span></td>;
       default:
         return '';
     }

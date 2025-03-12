@@ -40,7 +40,7 @@ function Header() {
             <Container fluid>
                 {/* Logo */}
                 <Navbar.Brand as={Link} to="/" className="navbar-brand">
-                    <Link href="/" passHref>
+                    <Link href="/">
                         <img src="/logoPage.png" alt="Logo" className="navbar-brand-img" style={{ maxWidth: '100%' }} />
                     </Link>
                 </Navbar.Brand>

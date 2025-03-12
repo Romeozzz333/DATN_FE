@@ -9,7 +9,6 @@ import ModalAddProduct from './ModalAddProduct';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { CodeBillByEmployee, findBillByCodeAndEmployee, fetchPostsBillSuccess } from '../../../../redux/action/billByEmployeeAction';
-import { fetchBillDetailByEmployeeByCodeBill } from '../../../../redux/action/billDetailByEmployeeAction';
 
 const ModalCart = ({ codeBill, setCodeBill }) => {
     const dispatch = useDispatch();
@@ -21,9 +20,6 @@ const ModalCart = ({ codeBill, setCodeBill }) => {
         dispatch(CodeBillByEmployee());
     }, [dispatch]);
 
-    useEffect(() => {
-        dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
-    }, [dispatch, codeBill]);
     useEffect(() => {
         if (billByCode && billByCode.status && billByCode?.status !== "WAITING_FOR_PAYMENT") {
             setCodeBill("");

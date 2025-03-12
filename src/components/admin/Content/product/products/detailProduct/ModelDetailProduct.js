@@ -5,7 +5,6 @@ import InfoProduct from './InfoProduct';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { findProductByIdProduct } from '../../../../../../redux/action/productAction'
-import ListImageProduct from '../../../../../../image/ListImageProduct';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthGuard from "../../../../../auth/AuthGuard";
 import RoleBasedGuard from "../../../../../auth/RoleBasedGuard";
