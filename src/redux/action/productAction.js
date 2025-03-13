@@ -23,39 +23,10 @@ export const updateStatusProductById = (idProduct, aBoolean) => {
             const response = await updateStatusProduct(idProduct, aBoolean);
             if (response.status === 200) {
                 dispatch(fetchAllProductProductDetail());
-                toast.success("Cập nhật sản phẩm thành công!");
+                toast.success("Cập nhật trạng thái sản phẩm thành công!");
             }
         } catch (error) {
-            console.error("Lỗi khi cập nhật sản phẩm:", error);
-
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorData = error.response.data;
-
-                if (statusCode === 400) {
-                    // Xử lý lỗi validation (400 Bad Request)
-                    if (Array.isArray(errorData)) {
-                        errorData.forEach(err => {
-                            toast.error(err); // Hiển thị từng lỗi trong mảng
-                        });
-                    } else {
-                        toast.error("Đã xảy ra lỗi xác thực. Vui lòng kiểm tra lại.");
-                    }
-                } else if (statusCode === 409) {
-                    const { mess } = errorData;
-                    toast.error(mess);
-                } else {
-                    // Xử lý các lỗi khác
-                    toast.error("Lỗi hệ thống. Vui lòng thử lại sau.");
-                }
-            } else if (error.request) {
-                // Lỗi do không nhận được phản hồi từ server
-                toast.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.");
-            } else {
-                // Lỗi khác (cấu hình, v.v.)
-                toast.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
-            }
-
+            console.error("Lỗi khi cập nhật trạng thái sản phẩm:", error);
             dispatch(fetchPostsError());
         }
     };
@@ -124,35 +95,6 @@ export const createNewNewProduct = (newProduct) => {
             }
         } catch (error) {
             console.error("Lỗi khi thêm sản phẩm:", error);
-
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorData = error.response.data;
-
-                if (statusCode === 400) {
-                    // Xử lý lỗi validation (400 Bad Request)
-                    if (Array.isArray(errorData)) {
-                        errorData.forEach(err => {
-                            toast.error(err); // Hiển thị từng lỗi trong mảng
-                        });
-                    } else {
-                        toast.error("Đã xảy ra lỗi xác thực. Vui lòng kiểm tra lại.");
-                    }
-                } else if (statusCode === 409) {
-                    // Xử lý lỗi email đã tồn tại (409 Conflict)
-                    const { mess } = errorData;
-                    toast.error(mess || "Lỗi khi thêm sản phẩm vào hệ thống.");
-                } else {
-                    // Xử lý các lỗi khác
-                    toast.error("Lỗi hệ thống. Vui lòng thử lại sau.");
-                }
-            } else if (error.request) {
-                // Lỗi do không nhận được phản hồi từ server
-                toast.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.");
-            } else {
-                // Lỗi khác (cấu hình, v.v.)
-                toast.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
-            }
             dispatch(fetchPostsError());
             return false; // Thất bại
         }
@@ -164,39 +106,10 @@ export const updatePutProduct = (updateProduct) => {
             const response = await putUpdateProduct(updateProduct);
             if (response.status === 200) {
                 toast.success("Cập nhật sản phẩm thành công!");
-                return true; 
+                return true;
             }
         } catch (error) {
             console.error("Lỗi khi cập nhật sản phẩm:", error);
-
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorData = error.response.data;
-
-                if (statusCode === 400) {
-                    // Xử lý lỗi validation (400 Bad Request)
-                    if (Array.isArray(errorData)) {
-                        errorData.forEach(err => {
-                            toast.error(err); // Hiển thị từng lỗi trong mảng
-                        });
-                    } else {
-                        toast.error("Đã xảy ra lỗi xác thực. Vui lòng kiểm tra lại.");
-                    }
-                } else if (statusCode === 409) {
-                    // Xử lý lỗi email đã tồn tại (409 Conflict)
-                    const { mess } = errorData;
-                    toast.error(mess || "Lỗi khi thêm sản phẩm vào hệ thống.");
-                } else {
-                    // Xử lý các lỗi khác
-                    toast.error("Lỗi hệ thống. Vui lòng thử lại sau.");
-                }
-            } else if (error.request) {
-                // Lỗi do không nhận được phản hồi từ server
-                toast.error("Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.");
-            } else {
-                // Lỗi khác (cấu hình, v.v.)
-                toast.error("Đã xảy ra lỗi. Vui lòng thử lại sau.");
-            }
             dispatch(fetchPostsError());
             return false; // Thất bại
         }
