@@ -30,7 +30,10 @@ export const findByStatusActiveFromProduct = async (filters = {}) => {
     const response = await authorizeAxiosInstance.get(`/product/list-product?${params.toString()}`);
     return response;
 };
-
+const exportProduct = async (idProduct, quantity) => {
+    const response = await authorizeAxiosInstance.get(`product/ExportProduct?idProduct=${idProduct}&quantity=${quantity}`)
+    return response;
+};
 const findByName = async (searchName) => {
     const response = await authorizeAxiosInstance.get(`/product/list-product?name=${searchName}`)
     return response;
@@ -89,5 +92,6 @@ export {
     findProductResponseById,
     putUpdateProduct,
     getAllPriceRangePromotion,
-    findListPayProduct
+    findListPayProduct,
+    exportProduct
 };
