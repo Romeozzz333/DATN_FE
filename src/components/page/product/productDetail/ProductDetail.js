@@ -132,19 +132,18 @@ function ProductDetail() {
   };
 
   // Handle pay now
-  // const handlePayNow = () => {
-  //   if (!selectedProductUnit) {
-  //     toast.error('Vui lòng chọn loại sản phẩm');
-  //     return;
-  //   }
-  //   navigate('/checkout', {
-  //     state: {
-  //       productId: idProduct,
-  //       productUnitId: selectedProductUnit.id,
-  //       quantity,
-  //     },
-  //   });
-  // };
+  const handlePayNow = async () => {
+    let products = {
+      idProduct: Number(idProduct),
+      quantity: quantity * selectedProductUnit.conversionFactor
+    }
+    navigate(`/Payment`, {
+      state: {
+        listProducts: [products],
+        method: false
+      }
+    });
+  };
 
   return (
     <div id="product-detail" className="inner p-5 bg-white container-fluid">
@@ -249,14 +248,14 @@ function ProductDetail() {
                 >
                   Thêm vào giỏ hàng
                 </button>
-                {/* <button
+                <button
                   type="button"
                   className="btn btn-primary flex-fill"
                   disabled={!selectedProductUnit || quantity < 1 || product.quantity < selectedProductUnit.conversionFactor}
                   onClick={handlePayNow}
                 >
                   Mua ngay
-                </button> */}
+                </button>
               </div>
 
               <div className="product-detail__description mt-4">
