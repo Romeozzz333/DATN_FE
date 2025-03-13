@@ -163,7 +163,7 @@ const Cart = () => {
                 );
                 navigate(`/Payment`, {
                     state: {
-                        listProductDetails: filteredItems,
+                        listProducts: filteredItems,
                         method: false
                     }
                 });

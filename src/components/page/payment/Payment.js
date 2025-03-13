@@ -8,7 +8,7 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import { payBillOnline, payBillOnlinev2 } from '../../../Service/ApiBillService';
 import { getCartDetailByAccountIdAndListIdCartDetail } from '../../../Service/ApiCartSevice';
-import { findListPayProductDetail } from '../../../Service/ApiProductDetailService';
+import { findListPayProduct } from '../../../Service/ApiProductService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import ListImageProduct from '../../../image/ListImageProduct'
@@ -29,11 +29,11 @@ const Payment = () => {
     const location = useLocation();
     const IdCartDetail = (location.state?.selectedCartDetails || []).join(",");
     const method = location.state?.method ?? false;
-    const listProductDetails = location.state?.listProductDetails || [];
+    const listProducts = location.state?.listProducts || [];
     const [voucher, setVoucher] = useState({});
 
     const [currentItems, setCurrentItems] = useState([]);
-    const [payProductDetail, setPayProductDetail] = useState([]);
+    const [payProduct, setPayProduct] = useState([]);
     const [totalMerchandise, setTotalMerchandise] = useState(0);//Tổng tiền hàng đã mua
     const [priceDiscount, setPriceDiscount] = useState(0);//Giảm giá
     const [totalAmount, setTotalAmount] = useState(0);//Tổng tiền hàng đã bao gồm giảm giá
@@ -117,18 +117,18 @@ const Payment = () => {
         }
     }
     const findCartDetailPayNowAndLocal = async () => {
-        if (listProductDetails && listProductDetails.length > 0) {
+        if (listProducts && listProducts.length > 0) {
             try {
-                let response = await findListPayProductDetail(listProductDetails);
+                let response = await findListPayProduct(listProducts);
                 if (response.status === 200) {
                     const validProducts = response.data.filter((product) => !product.error);
                     setCurrentItems(validProducts);
-                    const productDetailPromoRequests = validProducts.map((product) => ({
-                        idProductDetail: product.idProductDetail,
+                    const productPromoRequests = validProducts.map((product) => ({
+                        idProduct: product.idProduct,
                         quantity: product.quantityBuy,
                     }));
 
-                    setPayProductDetail(productDetailPromoRequests);
+                    setPayProduct(productPromoRequests);
                     const invalidProducts = response.data.filter((product) => product.error);
                     console.error("Invalid products:", invalidProducts);
                     invalidProducts.forEach((product) => {
@@ -175,8 +175,8 @@ const Payment = () => {
 
     const calculateTotalCartPriceForSelected = () => {
         // Tính tổng giá các sản phẩm được chọn
-        return currentItems.reduce((total, productDetail) => {
-            return total + calculatePricePerProductDetail(productDetail);
+        return currentItems.reduce((total, product) => {
+            return total + calculatePricePerProduct(product);
         }, 0);
     };
     useEffect(() => {
@@ -255,28 +255,28 @@ const Payment = () => {
         // Định dạng số thành chuỗi với dấu phẩy phân cách hàng nghìn
         return roundedValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
-    const calculatePricePerProductDetail = (productDetail) => {
+    const calculatePricePerProduct = (product) => {
         const {
-            productDetailPrice,
+            pricePerBaseUnit,
             quantityCartDetail,
             quantityBuy,
             quantityPromotionDetail,
             value
-        } = productDetail;
+        } = product;
 
         // Áp dụng điều kiện để chọn số lượng phù hợp
         const quantity = method ? quantityCartDetail : quantityBuy;
         if (!value) {
             // Nếu không có khuyến mãi
-            return productDetailPrice * quantity;
+            return pricePerBaseUnit * quantity;
         } else if (quantity <= quantityPromotionDetail) {
             // Nếu có khuyến mãi và số lượng <= số lượng được áp dụng khuyến mãi
-            return productDetailPrice * (1 - value / 100) * quantity;
+            return pricePerBaseUnit * (1 - value / 100) * quantity;
         } else {
             // Nếu có khuyến mãi và số lượng > số lượng được áp dụng khuyến mãi
             return (
-                productDetailPrice * (1 - value / 100) * quantityPromotionDetail +
-                productDetailPrice * (quantity - quantityPromotionDetail)
+                pricePerBaseUnit * (1 - value / 100) * quantityPromotionDetail +
+                pricePerBaseUnit * (quantity - quantityPromotionDetail)
             );
         }
     };
@@ -315,9 +315,9 @@ const Payment = () => {
             return false;
         }
     }
-    const payBillv2 = async (productDetailPromoRequests, codeVoucher, idAccount, name, phoneNumber, address, note) => {
+    const payBillv2 = async (productPromoRequests, codeVoucher, idAccount, name, phoneNumber, address, note) => {
         try {
-            const response = await payBillOnlinev2(productDetailPromoRequests, codeVoucher, idAccount, name, phoneNumber, address, note)
+            const response = await payBillOnlinev2(productPromoRequests, codeVoucher, idAccount, name, phoneNumber, address, note)
             if (response.status === 200) {
                 toast.success("Thanh toán thành công!");
                 return true;
@@ -383,12 +383,12 @@ const Payment = () => {
                             });
                         }
                     } else {
-                        const isSuccess = await payBillv2(payProductDetail, voucher.codeVoucher, idUser || '', nameCustomer, phoneNumber, fullAddress, note);
+                        const isSuccess = await payBillv2(payProduct, voucher.codeVoucher, idUser || '', nameCustomer, phoneNumber, fullAddress, note);
 
                         if (isSuccess) {
                             // Nếu thành công
-                            if (payProductDetail && payProductDetail?.length > 0) {
-                                deleteSelectCartLocal(payProductDetail)
+                            if (payProduct && payProduct?.length > 0) {
+                                deleteSelectCartLocal(payProduct)
                             }
                             swal("Thanh toán thành công!", {
                                 icon: "success",
@@ -420,44 +420,47 @@ const Payment = () => {
                 <h4>Trang thanh toán</h4>
                 <p className="text-custom-color">Kiểm tra các mặt hàng của bạn. Và chọn một phương thức vận chuyển phù hợp</p>
                 {currentProducts?.map((item) => (
-                    <div key={idUser ? item.idCartDetail : item.idProductDetail} className="payment-card">
+                    <div key={idUser ? item.idCartDetail : item.idProduct} className="payment-card">
                         <table className="product-table">
                             <tbody>
                                 <tr>
                                     <td rowSpan="4" className="product-image-cell">
                                         <ListImageProduct
-                                            id={item?.idProductDetail}
+                                            id={item?.idProduct}
                                             maxWidth="150px"
                                             maxHeight="150px"
                                         />
                                     </td>
-                                    <OverlayTrigger
-                                        placement="top"
-                                        overlay={<Tooltip>{item.nameProduct}</Tooltip>}
-                                    >
-                                        <p className="product-name truncate-text">{item.nameProduct}</p>
-                                    </OverlayTrigger>
                                 </tr>
-                                <tr><td>Màu: {item.nameColor} - Kích cỡ: {item.nameSize}</td></tr>
+                                <tr>
+                                    <td>
+                                        <OverlayTrigger
+                                            placement="top"
+                                            overlay={<Tooltip>{item.nameProduct}</Tooltip>}
+                                        >
+                                            <p className="product-name truncate-text">{item.nameProduct} ({item.baseUnit})</p>
+                                        </OverlayTrigger>
+                                    </td>
+                                </tr>
                                 <tr><td>Số lượng: {(method ? item.quantityCartDetail : item.quantityBuy)}</td></tr>
                                 <tr>
                                     {item.value ? (
                                         <td>
                                             <p className='text-danger'>
-                                                {formatCurrency((item.productDetailPrice || 0) * (1 - (item.value / 100)))} VND
+                                                {formatCurrency((item.pricePerBaseUnit || 0) * (1 - (item.value / 100)))} VND
                                             </p>
                                             <p className="text-decoration-line-through">
-                                                {formatCurrency(item.productDetailPrice || 0)} VND
+                                                {formatCurrency(item.pricePerBaseUnit || 0)} VND
                                             </p>
                                             {/* <Countdown endDate={item.endAtByPromotion} /> */}
                                         </td>
                                     ) : (
                                         <td>
-                                            <p className=''>{formatCurrency(item.productDetailPrice || 0)} VND</p>
+                                            <p className=''>{formatCurrency(item.pricePerBaseUnit || 0)} VND</p>
                                         </td>
                                     )}
                                     <td colSpan="2" style={{ textAlign: 'right' }} className='text-danger'>
-                                        Thành tiền: {formatCurrency(calculatePricePerProductDetail(item))} VND
+                                        Thành tiền: {formatCurrency(calculatePricePerProduct(item))} VND
                                     </td>
                                 </tr>
                             </tbody>
