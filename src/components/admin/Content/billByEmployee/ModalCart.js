@@ -9,7 +9,7 @@ import ModalAddProduct from './ModalAddProduct';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { CodeBillByEmployee, findBillByCodeAndEmployee, fetchPostsBillSuccess } from '../../../../redux/action/billByEmployeeAction';
-
+import { fetchBillDetailByEmployeeByCodeBill } from '../../../../redux/action/billDetailByEmployeeAction';
 const ModalCart = ({ codeBill, setCodeBill }) => {
     const dispatch = useDispatch();
     const { billByCode } = useSelector((state) => state.codeBill);
@@ -19,7 +19,9 @@ const ModalCart = ({ codeBill, setCodeBill }) => {
     useEffect(() => {
         dispatch(CodeBillByEmployee());
     }, [dispatch]);
-
+    useEffect(() => {
+        dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
+    }, [codeBill]);
     useEffect(() => {
         if (billByCode && billByCode.status && billByCode?.status !== "WAITING_FOR_PAYMENT") {
             setCodeBill("");
@@ -32,7 +34,7 @@ const ModalCart = ({ codeBill, setCodeBill }) => {
         dispatch(findBillByCodeAndEmployee(item))
         setCodeBill(item)
     }
-    
+
     return (
         <>
             <div className='nav-tab-bill mb-3'>

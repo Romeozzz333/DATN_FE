@@ -91,9 +91,9 @@ const Invoice = ({ bill, billDetails, account }) => {
       <Page style={styles.page}>
 
         <View style={styles.header}>
-          <Image style={styles.logo} src="/logomain.jpg" />
+          <Image style={styles.logo} src="/logoPage.png" />
           <View style={styles.companyInfo}>
-            <Text>Công ty Super Shoes</Text>
+            <Text>Công ty Bee Green</Text>
             <Text style={{ width: 200, wordBreak: "break-word" }}>
               Hóa đơn: {bill.codeBill.substring(0, 20)}
             </Text>
@@ -129,7 +129,7 @@ const Invoice = ({ bill, billDetails, account }) => {
             <View style={styles.tableRow} key={detail.idBillDetail}>
               <Text style={styles.tableCell}>{index + 1}</Text>
               <Text style={styles.tableCellWide}>
-                {detail.nameProduct} - {detail.nameColor} - Size {detail.nameSize}
+                {detail.nameProduct} ({detail.baseUnit})
               </Text>
               <Text style={styles.tableCell}>{detail.quantityBillDetail}</Text>
               <Text style={styles.tableCell}>
@@ -179,10 +179,10 @@ const Invoice = ({ bill, billDetails, account }) => {
 
         <View style={{ textAlign: "center", flex: 1, paddingTop: '20px' }}>
           <Text style={{ marginTop: 5 }}>Người bán hàng</Text>
-          <Text style={{ marginTop: 5,paddingTop:'10px' }}>{account.name || ""}</Text>
+          <Text style={{ marginTop: 5, paddingTop: '10px' }}>{account.name || ""}</Text>
           <Text style={styles.footer}>Cảm ơn quý khách</Text>
         </View>
-      
+
       </Page>
     </Document>
   );

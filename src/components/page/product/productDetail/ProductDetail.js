@@ -8,7 +8,6 @@ import { findProduct } from '../../../../redux/action/productAction';
 import { addProductToCart } from '../../../../Service/ApiCartSevice';
 import { getAccountLogin } from '../../../../Service/ApiAccountService';
 import { initialize } from '../../../../redux/action/authAction';
-import { fetchProductDetailActive } from '../../../../redux/action/productDetailAction';
 import { addToCartLocal } from '../../../managerCartLocal/CartManager';
 import { findProductResponseByIdAndType } from '../../../../Service/ApiProductUnitsService';
 import './ProductDetail.scss';

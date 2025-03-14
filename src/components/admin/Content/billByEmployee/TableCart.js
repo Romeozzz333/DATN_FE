@@ -9,7 +9,7 @@ import ListImageProduct from '../../../../image/ListImageProduct'
 import { plusBillDetail, subtractBillDetail, deleteBillDetail } from '../../../../Service/ApiBillDetailByEmployeeService';
 import { fetchBillDetailByEmployeeByCodeBill } from '../../../../redux/action/billDetailByEmployeeAction';
 import { toast } from 'react-toastify';
-import {FaTrash} from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
 import { FaCirclePlus } from "react-icons/fa6";
 import { FaMinusCircle } from "react-icons/fa";
 const TableCart = ({ codeBill }) => {
@@ -60,10 +60,10 @@ const TableCart = ({ codeBill }) => {
         // Định dạng số thành chuỗi với dấu phẩy phân cách hàng nghìn
         return roundedValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
-    const handleDeleteByIdBillDetail = async (idBillDetail, idProductDetail) => {
-        if (idBillDetail && idProductDetail) {
+    const handleDeleteByIdBillDetail = async (idBillDetail, idProduct) => {
+        if (idBillDetail && idProduct) {
             try {
-                const response = await deleteBillDetail(idBillDetail, idProductDetail);
+                const response = await deleteBillDetail(idBillDetail, idProduct);
                 if (response.status === 200) {
                     dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
                     toast.success(response.data);
@@ -75,10 +75,10 @@ const TableCart = ({ codeBill }) => {
         // Đặt lại trang hiện tại
         setCurrentPage(1);
     };
-    const handleDecreaseQuantity = async (idBillDetail, idProductDetail) => {
-        if (idBillDetail && idProductDetail) {
+    const handleDecreaseQuantity = async (idBillDetail, idProduct) => {
+        if (idBillDetail && idProduct) {
             try {
-                const response = await subtractBillDetail(idBillDetail, idProductDetail);
+                const response = await subtractBillDetail(idBillDetail, idProduct);
                 if (response.status === 200) {
                     dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
                     toast.success("Giảm số lượng thành công!");
@@ -90,10 +90,10 @@ const TableCart = ({ codeBill }) => {
         // Đặt lại trang hiện tại
         setCurrentPage(1);
     };
-    const handleIncreaseQuantity = async (idBillDetail, idProductDetail) => {
-        if (idBillDetail && idProductDetail) {
+    const handleIncreaseQuantity = async (idBillDetail, idProduct) => {
+        if (idBillDetail && idProduct) {
             try {
-                const response = await plusBillDetail(idBillDetail, idProductDetail);
+                const response = await plusBillDetail(idBillDetail, idProduct);
                 if (response.status === 200) {
                     dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
                     toast.success("Thêm thành công");
@@ -123,16 +123,15 @@ const TableCart = ({ codeBill }) => {
                         currentItems.map((item, index) => (
                             <tr key={item.idBillDetail}>
                                 <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                <td><ListImageProduct id={item?.idProductDetail} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                <td><ListImageProduct id={item?.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                 <td>
                                     <div>
-                                        {item.nameProduct}[{item.nameColor}-{item.nameSize}]
+                                        {item.nameProduct} ({item.baseUnit})
                                     </div>
-                                    <p>Màu: {item.nameColor} - Kích cỡ: {item.nameSize}</p>
                                 </td>
                                 <td className="text-center">
                                     <div className="d-flex justify-content-center align-items-center">
-                                        <FaMinusCircle  className="me-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleDecreaseQuantity(item.idBillDetail, item.idProductDetail)} />
+                                        <FaMinusCircle className="me-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleDecreaseQuantity(item.idBillDetail, item.idProduct)} />
                                         <OverlayTrigger
                                             placement="top"
                                             overlay={<Tooltip>Giá trị hiện tại là {item.quantityBillDetail}</Tooltip>}
@@ -146,7 +145,7 @@ const TableCart = ({ codeBill }) => {
                                                 style={{ width: `${Math.max(5, String(item.quantityBillDetail).length)}ch`, fontSize: '1.25rem' }}
                                             />
                                         </OverlayTrigger>
-                                        <FaCirclePlus className="ms-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleIncreaseQuantity(item.idBillDetail, item.idProductDetail)} />
+                                        <FaCirclePlus className="ms-2" style={{ cursor: 'pointer', fontSize: '1.5rem' }} onClick={() => handleIncreaseQuantity(item.idBillDetail, item.idProduct)} />
                                     </div>
                                 </td>
 
@@ -154,7 +153,7 @@ const TableCart = ({ codeBill }) => {
                                 <td className='text-center'>
                                     <p className='text-danger'>{formatCurrency(item?.priceDiscount || 0)} VND</p>
                                 </td>
-                                <td className='text-center'><FaTrash className='text-danger' size={'30px'} onClick={() => handleDeleteByIdBillDetail(item.idBillDetail, item.idProductDetail)} /></td>
+                                <td className='text-center'><FaTrash className='text-danger' size={'30px'} onClick={() => handleDeleteByIdBillDetail(item.idBillDetail, item.idProduct)} /></td>
                             </tr>
                         ))
                     ) : (
