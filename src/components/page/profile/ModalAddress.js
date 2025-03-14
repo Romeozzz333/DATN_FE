@@ -98,9 +98,11 @@ const ModalAddress = ({ idCustomer, onSubmitSuccess }) => {
                 </Modal.Header>
                 <Modal.Body>
                     <div className="text-end">
-                        <Button variant="outline-primary" onClick={handleOpenCreateModal}>
-                            Thêm địa chỉ mới
-                        </Button>
+                        {(accountDetail.role === "CUSTOMER" || !currentItems.length > 0) &&
+                            <Button variant="outline-primary" onClick={handleOpenCreateModal}>
+                                Thêm địa chỉ mới
+                            </Button>
+                        }
                     </div>
                     <hr />
                     {currentItems.length > 0 ? (
@@ -118,17 +120,20 @@ const ModalAddress = ({ idCustomer, onSubmitSuccess }) => {
                                 <div className="col-7">
                                     <h5 className="fw-bold">
                                         {accountDetail.name}
-                                        <MdDelete
-                                            color="red"
-                                            onClick={() => handleDelete(item.id)}
-                                            style={{ cursor: "pointer" }}
-                                        />
+                                        {
+                                            accountDetail.role === "CUSTOMER" &&
+                                            <MdDelete
+                                                color="red"
+                                                onClick={() => handleDelete(item.id)}
+                                                style={{ cursor: "pointer" }}
+                                            />
+                                        }
                                     </h5>
                                     <p>{accountDetail.phoneNumber}</p>
                                     <p>{item.address}</p>
                                     {item.type === 1 && (
                                         <Button variant="outline-success" disabled>
-                                        Mặc định
+                                            Mặc định
                                         </Button>
                                     )}
                                 </div>
@@ -197,16 +202,16 @@ const ModalAddress = ({ idCustomer, onSubmitSuccess }) => {
                 />
             )}
             {showUpdateModal && (
-    <ModalUpdateAddressCustomer
-        showUpdateModal={showUpdateModal}
-        idCustomer={idCustomer}
-        idAddress={selectedUpdateAddressById}
-        onSubmitSuccess={() => {
-            setShowUpdateModal(false); // Close the update modal
-            handleShowAddressAfterSubmit(); // Handle post-submit actions
-        }}
-    />
-)}
+                <ModalUpdateAddressCustomer
+                    showUpdateModal={showUpdateModal}
+                    idCustomer={idCustomer}
+                    idAddress={selectedUpdateAddressById}
+                    onSubmitSuccess={() => {
+                        setShowUpdateModal(false); // Close the update modal
+                        handleShowAddressAfterSubmit(); // Handle post-submit actions
+                    }}
+                />
+            )}
 
 
         </>

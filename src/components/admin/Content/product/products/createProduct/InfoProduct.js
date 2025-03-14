@@ -35,14 +35,6 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
         const cleanValue = value.replace(/[^0-9]/g, '');
         return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
-    const formatQuantity = (value) => {
-        if (!value) return '';
-
-        const cleanValue = value.replace(/[^0-9.]/g, '');
-
-        return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
-
     const parseNumber = (formattedValue) => {
         return formattedValue.replace(/\./g, '');
     };
@@ -113,13 +105,12 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                 ...newError,
             }));
         } else if (name === 'quantity') {
-            const formattedValue = formatQuantity(value);
             setProduct((prev) => ({
                 ...prev,
-                [name]: formattedValue,
+                [name]: value,
             }));
 
-            const newError = validateForm(name, formattedValue);
+            const newError = validateForm(name, value);
             setFormErrors((prev) => ({
                 ...prev,
                 ...newError,
@@ -154,13 +145,12 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                 ...newError,
             }));
         } else if (name === 'quantity') {
-            const formattedValue = formatQuantity(value);
             setProduct((prev) => ({
                 ...prev,
-                [name]: formattedValue,
+                [name]: value,
             }));
 
-            const newError = validateForm(name, formattedValue);
+            const newError = validateForm(name, value);
             setFormErrors((prev) => ({
                 ...prev,
                 ...newError,
@@ -308,7 +298,7 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                     <Form.Group>
                         <Form.Label>Số lượng:</Form.Label>
                         <Form.Control
-                            type="text"
+                            type="number"
                             placeholder="Nhập số lượng sản phẩm ..."
                             name="quantity"
                             value={product.quantity}

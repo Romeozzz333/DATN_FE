@@ -132,7 +132,7 @@ const ModelUpdateProduct = () => {
             return false;
         }
 
-        const quantityStr = String(productData.quantity ?? '').replace(/\./g, '');
+        const quantityStr = productData.quantity;
         if (!quantityStr) {
             toast.error('Số lượng là bắt buộc');
             return false;
@@ -229,7 +229,7 @@ const ModelUpdateProduct = () => {
             <RoleBasedGuard accessibleRoles={['ADMIN']}>
                 <div className="model-create-product container-fluid">
                     <div className="model-create-product-info p-3 m-3">
-                        <h4 className="text-center p-3">Thêm sản phẩm</h4>
+                        <h4 className="text-center p-3">Cập nhật sản phẩm</h4>
                         <InfoProduct
                             product={product}
                             setProduct={setProduct}

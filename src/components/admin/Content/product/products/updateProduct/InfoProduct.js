@@ -33,15 +33,20 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
 
     const formatNumber = (value) => {
         if (!value) return '';
-        const cleanValue = value.replace(/[^0-9]/g, '');
-        return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
-    const formatQuantity = (value) => {
-        if (!value) return '';
 
-        const cleanValue = value.replace(/[^0-9.]/g, '');
+        // Chỉ cho phép nhập số
+        let cleanValue = value.replace(/[^0-9]/g, '');
 
-        return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        // Chuyển về số nguyên để kiểm tra giới hạn
+        let numericValue = parseInt(cleanValue, 10) || 0;
+
+        // Giới hạn tối đa 1.000.000
+        if (numericValue > 1000000) {
+            numericValue = 1000000;
+        }
+
+        // Định dạng lại số với dấu chấm ngăn cách hàng nghìn
+        return numericValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     };
 
     const parseNumber = (formattedValue) => {
@@ -114,7 +119,7 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                 ...newError,
             }));
         } else if (name === 'quantity') {
-            const formattedValue = formatQuantity(value);
+            const formattedValue = value;
             setProduct((prev) => ({
                 ...prev,
                 [name]: formattedValue,
@@ -155,7 +160,7 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                 ...newError,
             }));
         } else if (name === 'quantity') {
-            const formattedValue = formatQuantity(value);
+            const formattedValue = value;
             setProduct((prev) => ({
                 ...prev,
                 [name]: formattedValue,
@@ -309,7 +314,7 @@ const InfoProduct = ({ product, setProduct, formErrors, setFormErrors, handleSub
                     <Form.Group>
                         <Form.Label>Số lượng:</Form.Label>
                         <Form.Control
-                            type="text"
+                            type="number"
                             placeholder="Nhập số lượng sản phẩm ..."
                             name="quantity"
                             value={product.quantity}

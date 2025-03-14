@@ -29,9 +29,10 @@ const ModalAddProduct = ({ codeBill }) => {
     const handleSubmitCreate = async () => {
         try {
             if (selectedProductIds && selectedProductIds.length > 0) {
-                dispatch(createNewBillDetailByEmployee(codeBill, selectedProductIds))
-                dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
-                setSelectedProductIds([])
+                // dispatch(createNewBillDetailByEmployee(codeBill, selectedProductIds))
+                // dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
+                // setSelectedProductIds([])
+                console.log("selectedProductIds", selectedProductIds)
                 setShow(false);
             } else {
                 toast.error("Vui lòng lựa chọn sản phẩm.");
@@ -71,10 +72,10 @@ const ModalAddProduct = ({ codeBill }) => {
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
-                       Thoát
+                        Thoát
                     </Button>
                     <Button variant="primary" onClick={handleSubmitCreate}>
-                       Lưu
+                        Lưu
                     </Button>
                 </Modal.Footer>
             </Modal>

@@ -39,7 +39,11 @@ const Payment = () => {
     const [totalAmount, setTotalAmount] = useState(0);//Tổng tiền hàng đã bao gồm giảm giá
     const [address, setAddress] = useState({});
     const [idUser, setIdUser] = useState("");
-
+    const [cities, setCities] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
+    const [selectedCity, setSelectedCity] = useState("");
+    const [selectedDistrict, setSelectedDistrict] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 3;
 
@@ -76,15 +80,6 @@ const Payment = () => {
                         findCartDetailOfAccount(data)
                     } else {
                         findCartDetailPayNowAndLocal()
-                    }
-                    try {
-                        const response = await findAccountAddress(data.id);
-                        if (response.status === 200) {
-                            const dataAddress = response.data;
-                            setAddress(dataAddress);
-                        }
-                    } catch (error) {
-                        console.error(error);
                     }
                     dispatch(initialize({ isAuthenticated: true, data }))
                 } else {
@@ -149,6 +144,7 @@ const Payment = () => {
         }
     }
     useEffect(() => {
+        setSelectedCity("01");
         checkLogin()
     }, [dispatch]);
 
@@ -200,18 +196,7 @@ const Payment = () => {
         UPDATE_PAYMENT: checkLogin
     };
 
-    const [cities, setCities] = useState([]);
-    const [districts, setDistricts] = useState([]);
-    const [wards, setWards] = useState([]);
-    const [selectedCity, setSelectedCity] = useState("");
-    const [selectedDistrict, setSelectedDistrict] = useState("");
 
-    useEffect(() => {
-        if (address) {
-            setSelectedCity(address?.codeCity || '');
-            setSelectedDistrict(address?.codeDistrict || '');
-        }
-    }, [address]);
     // Lấy danh sách tỉnh/thành phố
     useEffect(() => {
         getCities().then((data) => {
@@ -516,7 +501,7 @@ const Payment = () => {
                 initialValues={{
                     name: address?.nameAccount || "",
                     phoneNumber: address?.phoneNumber || "",
-                    city: address?.codeCity || "",
+                    city: "01",
                     district: address?.codeDistrict || "",
                     ward: address?.codeWard || "",
                     address: findAddressDetail(address?.address || ""),
@@ -590,6 +575,7 @@ const Payment = () => {
                                         }}
                                         onBlur={handleBlur}
                                         isInvalid={touched.city && !!errors.city}
+                                        disabled
                                     >
                                         <option value="">Chọn Tỉnh/Thành Phố</option>
                                         {cities.map((city, index) => (
