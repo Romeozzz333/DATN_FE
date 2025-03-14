@@ -79,6 +79,10 @@ export async function getProductNameByIds(listId) {
         return Promise.reject(error);
     }
 }
+const getAllProductPromotion = async () => {
+    const response = await authorizeAxiosInstance.get(`/product/listProductPromotion`)
+    return response;
+};
 export {
     findProductPriceRangePromotion,
     updateStatusProduct,
@@ -93,5 +97,6 @@ export {
     putUpdateProduct,
     getAllPriceRangePromotion,
     findListPayProduct,
-    exportProduct
+    exportProduct,
+    getAllProductPromotion
 };

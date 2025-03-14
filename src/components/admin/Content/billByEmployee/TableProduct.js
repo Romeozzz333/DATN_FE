@@ -3,20 +3,16 @@ import Table from 'react-bootstrap/Table';
 import Pagination from 'react-bootstrap/Pagination';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllProductPromotion, fetchFilterProductPromotion } from '../../../../redux/action/productDetailAction';
+import { getAllProductPromotion } from '../../../../Service/ApiProductService';
 
 import { useDebounce } from 'use-debounce';
 import ListImageProduct from '../../../../image/ListImageProduct'
 const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
     const dispatch = useDispatch();
 
-    const listProduct = useSelector((state) => state.productDetail.listProductPromotion);
+    const [listProduct, setListProduct] = useState([]);
 
     const [isAllChecked, setIsAllChecked] = useState(false);
-
-    useEffect(() => {
-        dispatch(fetchAllProductPromotion());
-    }, [dispatch]);
 
     const [searchName, setSearchName] = useState("");
     const [searchPrice, setSearchPrice] = useState("");
@@ -27,10 +23,22 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
             // dispatch(fetchFilterProductPromotion(debouncedSearchName, searchPrice));
             setCurrentPage(1);
         } else {
-            dispatch(fetchAllProductPromotion());
+            getProduct()
         }
 
     }, [debouncedSearchName, searchPrice, dispatch]);
+
+    const getProduct = async () => {
+        try {
+            const response = await getAllProductPromotion();
+            if (response.status === 200) {
+                const data = response.data;
+                setListProduct(data)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 3;
@@ -78,39 +86,39 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
         setIsAllChecked(isChecked);
 
         if (isChecked) {
-            const allProductDetails = listProduct.map(item => ({ idProductDetail: item.idProductDetail, quantity: 1 }));
-            setSelectedProductIds(allProductDetails);
+            const allProducts = listProduct.map(item => ({ idProduct: item.idProduct, quantity: 1 }));
+            setSelectedProductIds(allProducts);
         } else {
             setSelectedProductIds([]);
         }
     };
 
     // Handle checkbox for individual products  
-    const handleCheckProduct = (event, idProductDetail) => {
+    const handleCheckProduct = (event, idProduct) => {
         const isChecked = event.target.checked;
 
         if (isChecked) {
             // Add product if not in selectedProductIds  
             setSelectedProductIds((prev) => {
-                const existingProduct = prev.find(product => product.idProductDetail === idProductDetail);
+                const existingProduct = prev.find(product => product.idProduct === idProduct);
                 if (!existingProduct) {
-                    return [...prev, { idProductDetail, quantity: 1 }];
+                    return [...prev, { idProduct, quantity: 1 }];
                 }
                 return prev; // Return previous state if product is already checked  
             });
         } else {
             // Remove product if unchecked  
-            setSelectedProductIds((prev) => prev.filter(product => product.idProductDetail !== idProductDetail));
+            setSelectedProductIds((prev) => prev.filter(product => product.idProduct !== idProduct));
         }
     };
 
     // Handle quantity change  
-    const handleQuantityChange = (event, idProductDetail, maxQuantity) => {
-        const updatedQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity>=1  
+    const handleQuantityChange = (event, idProduct, maxQuantity) => {
+        const updatedQuantity = event.target.value;
         const billQuanttity = (updatedQuantity < maxQuantity) ? updatedQuantity : maxQuantity;
         setSelectedProductIds((prev) =>
             prev.map((product) =>
-                product.idProductDetail === idProductDetail ? { ...product, quantity: billQuanttity } : product
+                product.idProduct === idProduct ? { ...product, quantity: parseFloat(billQuanttity) } : product
             )
         );
     };
@@ -119,7 +127,7 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
     useEffect(() => {
         if (listProduct.length > 0) {
             const allChecked = listProduct.every(item =>
-                selectedProductIds.some(product => product.idProductDetail === item.idProductDetail)
+                selectedProductIds.some(product => product.idProduct === item.idProduct)
             );
             setIsAllChecked(allChecked);
         }
@@ -176,57 +184,54 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
                     <tbody>
                         {currentItems && currentItems.length > 0 ? (
                             currentItems.map((item, index) => (
-                                <tr key={item.idProductDetail}>
+                                <tr key={item.idProduct}>
                                     <td>
                                         <Form.Check
                                             type="checkbox"
-                                            id={`flexCheckProduct-${item.idProductDetail}`} // Fixed id syntax  
-                                            checked={selectedProductIds.some(product => product.idProductDetail === item.idProductDetail)} // Check for inclusion correctly  
-                                            onChange={(event) => handleCheckProduct(event, item.idProductDetail)}
+                                            id={`flexCheckProduct-${item.idProduct}`} // Fixed id syntax  
+                                            checked={selectedProductIds.some(product => product.idProduct === item.idProduct)} // Check for inclusion correctly  
+                                            onChange={(event) => handleCheckProduct(event, item.idProduct)}
                                         />
                                     </td>
                                     <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                    <td><ListImageProduct id={item?.idProductDetail} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                    <td><ListImageProduct id={item?.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                     <td>
                                         <div>
-                                            {item.nameProduct}[{item.nameColor}-{item.nameSize}]
+                                            {item.nameProduct} ({item.baseUnit})
                                         </div>
-                                        <p>Màu: {item.nameColor} - Kích cỡ: {item.nameSize}</p>
                                     </td>
-                                    <td>{item.quantityProductDetail}</td>
+                                    <td>{item?.quantityProduct || 0}</td>
                                     <td>{item?.quantityPromotionDetail || 0}</td>
                                     <td style={{ maxWidth: 25 }}>
                                         <Form.Control
-                                            type="number"
+                                            type="text"
                                             id="quantityPromotionDetail"
                                             name="quantityPromotionDetail"
-                                            min="1"
-                                            max={item?.quantityProductDetail || 0}
-                                            value={selectedProductIds.find(product => product.idProductDetail === item.idProductDetail)?.quantity || 1}
-                                            onChange={(event) => handleQuantityChange(event, item.idProductDetail, item?.quantityProductDetail || 0)}
-                                            readOnly={!selectedProductIds.some(product => product.idProductDetail === item.idProductDetail)}
+                                            value={selectedProductIds.find(product => product.idProduct === item.idProduct)?.quantity || 1}
+                                            onChange={(event) => handleQuantityChange(event, item.idProduct, item?.quantityProduct || 0)}
+                                            readOnly={!selectedProductIds.some(product => product.idProduct === item.idProduct)}
                                         />
                                     </td>
                                     {item.value ? (
                                         <td>
                                             <p className='text-danger'>
-                                                {formatCurrency((item.productDetailPrice || 0) * (1 - (item.value / 100)))} VND
+                                                {formatCurrency((item.pricePerBaseUnit || 0) * (1 - (item.value / 100)))} VND
                                             </p>
                                             <p className="text-decoration-line-through">
-                                                {formatCurrency(item.productDetailPrice || 0)} VND
+                                                {formatCurrency(item.pricePerBaseUnit || 0)} VND
                                             </p>
                                             {/* <Countdown endDate={item.endAtByPromotion} /> */}
                                         </td>
                                     ) : (
                                         <td>
-                                            <p className=''>{formatCurrency(item.productDetailPrice || 0)} VND</p>
+                                            <p className=''>{formatCurrency(item.pricePerBaseUnit || 0)} VND</p>
                                         </td>
                                     )}
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6" className='text-center'>Không tìm thấy danh sách</td>
+                                <td colSpan="8" className='text-center'>Không tìm thấy danh sách</td>
                             </tr>
                         )}
                     </tbody>

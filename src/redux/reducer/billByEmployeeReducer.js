@@ -19,7 +19,6 @@ const counterReducer = (state = INITIAL_STATE, action) => {
         waitingList: waitingBills, // Cập nhật danh sách chờ
       };
     case Fetch_Bill_Success:
-      console.log("action.payload", action.payload)
       return {
         ...state,
         billByCode: action.payload,

@@ -4,13 +4,6 @@ import { Form, Container, Row, Col, Button } from 'react-bootstrap';
 const ModelCreateUnit = ({ productUnits, setProductUnits, idProductUnits, setIdProductUnits }) => {
     const [errors, setErrors] = useState(productUnits.map(() => ({})));
 
-    // Hàm định dạng số với dấu chấm phân cách hàng nghìn
-    const formatQuantity = (value) => {
-        if (!value) return '';
-        const cleanValue = value.replace(/[^0-9.]/g, ''); // Chỉ giữ số và dấu chấm
-        return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
-
     // Hàm validate một unit
     const validateUnit = (unit, index) => {
         const newErrors = [...errors];
@@ -46,11 +39,9 @@ const ModelCreateUnit = ({ productUnits, setProductUnits, idProductUnits, setIdP
         const newUnits = [...productUnits];
 
         if (name === 'conversionFactor') {
-            // Chỉ giữ số và dấu chấm, sau đó định dạng lại
-            const formattedValue = formatQuantity(value);
             newUnits[index] = {
                 ...newUnits[index],
-                [name]: formattedValue,
+                [name]: value,
             };
         } else {
             newUnits[index] = {
@@ -69,10 +60,9 @@ const ModelCreateUnit = ({ productUnits, setProductUnits, idProductUnits, setIdP
         const newUnits = [...productUnits];
 
         if (name === 'conversionFactor') {
-            const formattedValue = formatQuantity(value);
             newUnits[index] = {
                 ...newUnits[index],
-                [name]: formattedValue,
+                [name]: value,
             };
         } else {
             newUnits[index] = {
@@ -138,7 +128,7 @@ const ModelCreateUnit = ({ productUnits, setProductUnits, idProductUnits, setIdP
                         <Form.Group>
                             <Form.Label>Giá trị quy đổi:</Form.Label>
                             <Form.Control
-                                type="text"
+                                type="number"
                                 placeholder="Giá trị quy đổi ..."
                                 name="conversionFactor"
                                 value={unit.conversionFactor}

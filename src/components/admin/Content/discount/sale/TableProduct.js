@@ -127,15 +127,6 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
             }
 
         } catch (error) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorData = error.response.data;
-                if (statusCode === 409) {
-                    const { mess } = errorData;
-                    toast.error(mess || "Lỗi khi bỏ trống Id.");
-                }
-            }
-            toast.error(error)
             console.error("Lối khi nhập số lượng", error)
         }
     };

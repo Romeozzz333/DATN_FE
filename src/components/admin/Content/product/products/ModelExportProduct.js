@@ -23,13 +23,6 @@ function ModelExportProduct({ idProduct }) {
 
     const handleShow = () => setShow(true);
 
-    const formatQuantity = (value) => {
-        if (!value) return '';
-
-        const cleanValue = value.replace(/[^0-9.]/g, '');
-
-        return cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    };
 
     const parseNumber = (formattedValue) => {
         return formattedValue.replace(/\./g, '');
@@ -62,15 +55,13 @@ function ModelExportProduct({ idProduct }) {
 
     const handleChange = (e) => {
         const { value } = e.target;
-        const formattedValue = formatQuantity(value);
-        setQuantity(formattedValue);
-        validateForm(formattedValue);
+        setQuantity(value);
+        validateForm(value);
     };
     const handleBlur = (e) => {
         const { value } = e.target;
-        const formattedValue = formatQuantity(value);
-        setQuantity(formattedValue);
-        validateForm(formattedValue);
+        setQuantity(value);
+        validateForm(value);
     };
     const handleSubmit = async (e) => {
         try {
