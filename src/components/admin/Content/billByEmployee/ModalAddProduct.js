@@ -29,9 +29,9 @@ const ModalAddProduct = ({ codeBill }) => {
     const handleSubmitCreate = async () => {
         try {
             if (selectedProductIds && selectedProductIds.length > 0) {
-                // dispatch(createNewBillDetailByEmployee(codeBill, selectedProductIds))
-                // dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
-                // setSelectedProductIds([])
+                dispatch(createNewBillDetailByEmployee(codeBill, selectedProductIds))
+                dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
+                setSelectedProductIds([])
                 console.log("selectedProductIds", selectedProductIds)
                 setShow(false);
             } else {

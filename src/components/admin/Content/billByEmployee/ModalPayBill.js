@@ -54,14 +54,15 @@ const ModalPayBill = ({ codeBill, setCodeBill }) => {
         }
     }
     useEffect(() => {
+        setSelectedCity("01");
         if (delivery) {
             setFormData({
                 name: address?.nameAccount || '',
                 phoneNumber: address?.phoneNumber || '',
-                city: address?.codeCity || '',
-                district: address?.codeDistrict || '',
-                ward: address?.codeWard || '',
-                address: findAddressDetail(address?.address || ''),
+                city: '01',
+                district: '',
+                ward: '',
+                address: '',
                 note: ''
             });
 
@@ -158,13 +159,6 @@ const ModalPayBill = ({ codeBill, setCodeBill }) => {
         setIdAccount(address?.idAccount || "");
     }, [address]);
 
-    useEffect(() => {
-        if (address) {
-            setSelectedCity(address?.codeCity || '');
-            setSelectedDistrict(address?.codeDistrict || '');
-            setSelectedWard(address?.codeWard || '');
-        }
-    }, [address]);
 
     useEffect(() => {
         getCities().then((data) => {
@@ -272,10 +266,10 @@ const ModalPayBill = ({ codeBill, setCodeBill }) => {
                                 initialValues={{
                                     name: address?.nameAccount || '',
                                     phoneNumber: address?.phoneNumber || '',
-                                    city: address?.codeCity || '',
-                                    district: address?.codeDistrict || '',
-                                    ward: address?.codeWard || '',
-                                    address: findAddressDetail(address?.address || ''),
+                                    city: '01',
+                                    district: '',
+                                    ward: '',
+                                    address: '',
                                     note: ''
                                 }}
                                 enableReinitialize={true}
@@ -335,6 +329,7 @@ const ModalPayBill = ({ codeBill, setCodeBill }) => {
                                                     }}
                                                     onBlur={handleBlur}
                                                     isInvalid={touched.city && !!errors.city}
+                                                    disabled
                                                 >
                                                     <option value="">Tỉnh/Thành phố</option>
                                                     {cities.map((city) => (

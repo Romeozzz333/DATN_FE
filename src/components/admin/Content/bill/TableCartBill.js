@@ -37,8 +37,8 @@ const TableCart = ({
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
     const currentItems = currentProduct.slice(indexOfFirstItem, indexOfLastItem);
-  
-    
+
+
     const totalPages = Math.ceil(currentProduct.length / itemsPerPage);
 
     const handleClickPage = (number) => {
@@ -93,10 +93,10 @@ const TableCart = ({
         return roundedValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
-    const handleDeleteByIdBillDetail = async (codeBill, idBillDetail, idProductDetail) => {
-        if (idBillDetail && idProductDetail) {
+    const handleDeleteByIdBillDetail = async (codeBill, idBillDetail, idProduct) => {
+        if (idBillDetail && idProduct) {
             try {
-                const response = await deleteBillDetailByQuang(codeBill, idBillDetail, idProductDetail);
+                const response = await deleteBillDetailByQuang(codeBill, idBillDetail, idProduct);
                 if (response.status === 200) {
                     dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
                     await fetchBillDetailsAndPayBill();
@@ -110,10 +110,10 @@ const TableCart = ({
         setCurrentPage(1);
     };
 
-    const handleDecreaseQuantity = async (codeBill, idBillDetail, idProductDetail) => {
-        if (idBillDetail && idProductDetail) {
+    const handleDecreaseQuantity = async (codeBill, idBillDetail, idProduct) => {
+        if (idBillDetail && idProduct) {
             try {
-                const response = await subtractBillDetailByQuang(codeBill, idBillDetail, idProductDetail);
+                const response = await subtractBillDetailByQuang(codeBill, idBillDetail, idProduct);
                 if (response.status === 200) {
                     dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
                     await fetchBillDetailsAndPayBill();
@@ -127,10 +127,10 @@ const TableCart = ({
         setCurrentPage(1);
     };
 
-    const handleIncreaseQuantity = async (codeBill, idBillDetail, idProductDetail) => {
-        if (idBillDetail && idProductDetail) {
+    const handleIncreaseQuantity = async (codeBill, idBillDetail, idProduct) => {
+        if (idBillDetail && idProduct) {
             try {
-                const response = await plusBillDetailByQuang(codeBill, idBillDetail, idProductDetail);
+                const response = await plusBillDetailByQuang(codeBill, idBillDetail, idProduct);
                 if (response.status === 200) {
                     dispatch(fetchBillDetailByEmployeeByCodeBill(codeBill));
                     await fetchBillDetailsAndPayBill();
@@ -163,12 +163,11 @@ const TableCart = ({
                         currentItems.map((item, index) => (
                             <tr key={item.idBillDetail}>
                                 <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                <td><ListImageProduct id={item?.idProductDetail} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                <td><ListImageProduct id={item?.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                 <td>
                                     <div>
-                                        {item.nameProduct}[{item.nameColor}-{item.nameSize}]
+                                        {item.nameProduct} ({item.baseUnit})
                                     </div>
-                                    <p>Màu: {item.nameColor} - Kích cỡ: {item.nameSize}</p>
                                 </td>
                                 <td className="text-center">
                                     <div className="d-flex justify-content-center align-items-center">
@@ -178,7 +177,7 @@ const TableCart = ({
 
                                             onClick={() => {
                                                 if (billSummary?.status === 'PENDING') {
-                                                    handleDecreaseQuantity(codeBill, item.idBillDetail, item.idProductDetail);
+                                                    handleDecreaseQuantity(codeBill, item.idBillDetail, item.idProduct);
                                                 } else {
                                                     toast.warn("Không thể giảm số lượng khi hóa đơn không ở trạng thái 'Chờ xác nhận'");
                                                 }
@@ -209,7 +208,7 @@ const TableCart = ({
 
                                             onClick={() => {
                                                 if (billSummary?.status === 'PENDING') {
-                                                    handleIncreaseQuantity(codeBill, item.idBillDetail, item.idProductDetail);
+                                                    handleIncreaseQuantity(codeBill, item.idBillDetail, item.idProduct);
                                                 } else {
                                                     toast.warn("Không thể tăng số lượng khi hóa đơn không ở trạng thái 'Chờ xác nhận'");
                                                 }
@@ -229,7 +228,7 @@ const TableCart = ({
 
                                         onClick={() => {
                                             if (billSummary?.status === 'PENDING') {
-                                                handleDeleteByIdBillDetail(codeBill, item.idBillDetail, item.idProductDetail);
+                                                handleDeleteByIdBillDetail(codeBill, item.idBillDetail, item.idProduct);
                                             } else {
                                                 toast.warn("Không thể xóa sản phẩm khi hóa đơn không ở trạng thái 'Chờ xác nhận'");
                                             }

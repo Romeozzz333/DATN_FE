@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Table from 'react-bootstrap/Table';
 import Pagination from 'react-bootstrap/Pagination';
 import Form from 'react-bootstrap/Form';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { getAllProductPromotion } from '../../../../Service/ApiProductService';
 
-import { useDebounce } from 'use-debounce';
 import ListImageProduct from '../../../../image/ListImageProduct'
 const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
     const dispatch = useDispatch();
@@ -15,19 +14,16 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
     const [isAllChecked, setIsAllChecked] = useState(false);
 
     const [searchName, setSearchName] = useState("");
-    const [searchPrice, setSearchPrice] = useState("");
-    const [debouncedSearchName] = useDebounce(searchName, 1000);
-
     useEffect(() => {
-        if (debouncedSearchName || searchPrice !== "") {
-            // dispatch(fetchFilterProductPromotion(debouncedSearchName, searchPrice));
-            setCurrentPage(1);
-        } else {
-            getProduct()
-        }
+        getProduct()
+    }, [dispatch]);
+    const filteredAccounts = listProduct.filter((product) => {
+        const searchLower = searchName?.trim().toLowerCase();
 
-    }, [debouncedSearchName, searchPrice, dispatch]);
+        const namePromotion = product.nameProduct?.trim().toLowerCase().includes(searchLower);
 
+        return (namePromotion);
+    });
     const getProduct = async () => {
         try {
             const response = await getAllProductPromotion();
@@ -42,7 +38,7 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 3;
-    const currentProduct = [...listProduct];
+    const currentProduct = [...filteredAccounts];
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -147,18 +143,6 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
                         onChange={(event) => setSearchName(event.target.value)}
                     />
                 </div>
-                <div className='col'>
-                    <Form.Label>Khoảng Giá:</Form.Label>
-                    <Form.Select
-                        value={searchPrice}
-                        onChange={(event) => setSearchPrice(event.target.value)}
-                    >
-                        <option value="">Tất cả</option>
-                        <option value="under500">Dưới 500.000 VND</option>
-                        <option value="500to2000">Từ 500.000 VND đến 2.000.000 VND</option>
-                        <option value="above2000">Trên 2.000.000 VND</option>
-                    </Form.Select>
-                </div>
             </div>
             <div className='table-product mb-3'>
                 <Table striped bordered hover className='align-middle'>
@@ -204,7 +188,7 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
                                     <td>{item?.quantityPromotionDetail || 0}</td>
                                     <td style={{ maxWidth: 25 }}>
                                         <Form.Control
-                                            type="text"
+                                            type="number"
                                             id="quantityPromotionDetail"
                                             name="quantityPromotionDetail"
                                             value={selectedProductIds.find(product => product.idProduct === item.idProduct)?.quantity || 1}

@@ -4,8 +4,6 @@ import Pagination from 'react-bootstrap/Pagination';
 import Form from 'react-bootstrap/Form';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllProductPromotion, fetchFilterProductPromotion } from '../../../../redux/action/productDetailAction';
-import { fetchSizeByStatusActive } from '../../../../redux/action/sizeAction';
-import { fetchColorByStatusActive } from '../../../../redux/action/colorAction';
 import { useDebounce } from 'use-debounce';
 import ListImageProduct from '../../../../image/ListImageProduct'
 const NotFoundData = '/NotFoundData.png';
@@ -13,25 +11,19 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
     const dispatch = useDispatch();
 
     const listProduct = useSelector((state) => state.productDetail.listProductPromotion);
-    const sizes = useSelector((state) => state.size.listSize);
-    const colors = useSelector((state) => state.color.listColor);
     const [isAllChecked, setIsAllChecked] = useState(false);
 
     useEffect(() => {
         dispatch(fetchAllProductPromotion());
-        dispatch(fetchSizeByStatusActive());
-        dispatch(fetchColorByStatusActive());
     }, [dispatch]);
 
     const [searchName, setSearchName] = useState("");
-    const [searchColor, setSearchColor] = useState("");
-    const [searchSize, setSearchSize] = useState("");
     const [searchPrice, setSearchPrice] = useState("");
     const [debouncedSearchName] = useDebounce(searchName, 1000);
 
     useEffect(() => {
-        if (debouncedSearchName || searchColor !== "" || searchSize !== "" || searchPrice !== "") {
-            dispatch(fetchFilterProductPromotion(debouncedSearchName, searchSize, searchColor, searchPrice));
+        if (debouncedSearchName ||  searchPrice !== "") {
+            // dispatch(fetchFilterProductPromotion(debouncedSearchName, searchSize, searchColor, searchPrice));
             setCurrentPage(1);
         } else {
             dispatch(fetchAllProductPromotion());
@@ -85,7 +77,7 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
         setIsAllChecked(isChecked);
 
         if (isChecked) {
-            const allProductDetails = listProduct.map(item => ({ idProductDetail: item.idProductDetail, quantity: 1 }));
+            const allProductDetails = listProduct.map(item => ({ idProduct: item.idProduct, quantity: 1 }));
             setSelectedProductIds(allProductDetails);
         } else {
             setSelectedProductIds([]);
@@ -93,30 +85,30 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
     };
 
     // Handle checkbox for individual products  
-    const handleCheckProduct = (event, idProductDetail) => {
+    const handleCheckProduct = (event, idProduct) => {
         const isChecked = event.target.checked;
 
         if (isChecked) {
             // Add product if not in selectedProductIds  
             setSelectedProductIds((prev) => {
-                const existingProduct = prev.find(product => product.idProductDetail === idProductDetail);
+                const existingProduct = prev.find(product => product.idProduct === idProduct);
                 if (!existingProduct) {
-                    return [...prev, { idProductDetail, quantity: 1 }];
+                    return [...prev, { idProduct, quantity: 1 }];
                 }
                 return prev; // Return previous state if product is already checked  
             });
         } else {
             // Remove product if unchecked  
-            setSelectedProductIds((prev) => prev.filter(product => product.idProductDetail !== idProductDetail));
+            setSelectedProductIds((prev) => prev.filter(product => product.idProduct !== idProduct));
         }
     };
 
     // Handle quantity change  
-    const handleQuantityChange = (event, idProductDetail) => {
+    const handleQuantityChange = (event, idProduct) => {
         const updatedQuantity = Math.max(1, Number(event.target.value)); // Ensure quantity>=1  
         setSelectedProductIds((prev) =>
             prev.map((product) =>
-                product.idProductDetail === idProductDetail ? { ...product, quantity: updatedQuantity } : product
+                product.idProduct === idProduct ? { ...product, quantity: updatedQuantity } : product
             )
         );
     };
@@ -125,7 +117,7 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
     useEffect(() => {
         if (listProduct.length > 0) {
             const allChecked = listProduct.every(item =>
-                selectedProductIds.some(product => product.idProductDetail === item.idProductDetail)
+                selectedProductIds.some(product => product.idProduct === item.idProduct)
             );
             setIsAllChecked(allChecked);
         }
@@ -144,38 +136,6 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
                         placeholder="Tìm kiếm sản phẩm theo tên...."
                         onChange={(event) => setSearchName(event.target.value)}
                     />
-                </div>
-                <div className='col'>
-                    <Form.Label>Màu sắc:</Form.Label>
-                    <Form.Select
-                        value={searchColor}
-                        onChange={(event) => setSearchColor(event.target.value)}
-                    >
-                        <option value="">Tất cả</option>
-                        {colors && colors.length > 0 ? (
-                            colors.map((item) => (
-                                <option value={item.name} key={item.id}>{item.name}</option>
-                            ))
-                        ) : (
-                            <option value="">1</option>
-                        )}
-                    </Form.Select>
-                </div>
-                <div className='col'>
-                    <Form.Label>Kích cỡ:</Form.Label>
-                    <Form.Select
-                        value={searchSize}
-                        onChange={(event) => setSearchSize(event.target.value)}
-                    >
-                        <option value="">Tất cả</option>
-                        {sizes && sizes.length > 0 ? (
-                            sizes.map((item) => (
-                                <option value={item.name} key={item.id}>{item.name}</option>
-                            ))
-                        ) : (
-                            <option value=""></option>
-                        )}
-                    </Form.Select>
                 </div>
                 <div className='col'>
                     <Form.Label>Khoảng Giá:</Form.Label>
@@ -214,17 +174,17 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
                     <tbody>
                         {currentItems && currentItems.length > 0 ? (
                             currentItems.map((item, index) => (
-                                <tr key={item.idProductDetail}>
+                                <tr key={item.idProduct}>
                                     <td>
                                         <Form.Check
                                             type="checkbox"
-                                            id={`flexCheckProduct-${item.idProductDetail}`} // Fixed id syntax  
-                                            checked={selectedProductIds.some(product => product.idProductDetail === item.idProductDetail)} // Check for inclusion correctly  
-                                            onChange={(event) => handleCheckProduct(event, item.idProductDetail)}
+                                            id={`flexCheckProduct-${item.idProduct}`} // Fixed id syntax  
+                                            checked={selectedProductIds.some(product => product.idProduct === item.idProduct)} // Check for inclusion correctly  
+                                            onChange={(event) => handleCheckProduct(event, item.idProduct)}
                                         />
                                     </td>
                                     <td>{index + 1 + (currentPage - 1) * 3}</td>
-                                    <td><ListImageProduct id={item?.idProductDetail} maxWidth={'100px'} maxHeight={'100px'} /></td>
+                                    <td><ListImageProduct id={item?.idProduct} maxWidth={'100px'} maxHeight={'100px'} /></td>
                                     <td>
                                         <div>
                                             {item.nameProduct}[{item.nameColor}-{item.nameSize}]
@@ -240,9 +200,9 @@ const TableProduct = ({ selectedProductIds, setSelectedProductIds }) => {
                                             name="quantityPromotionDetail"
                                             min="1"
                                             max={item?.quantityProductDetail || 0}
-                                            value={selectedProductIds.find(product => product.idProductDetail === item.idProductDetail)?.quantity || 1}
-                                            onChange={(event) => handleQuantityChange(event, item.idProductDetail)}
-                                            readOnly={!selectedProductIds.some(product => product.idProductDetail === item.idProductDetail)}
+                                            value={selectedProductIds.find(product => product.idProduct === item.idProduct)?.quantity || 1}
+                                            onChange={(event) => handleQuantityChange(event, item.idProduct)}
+                                            readOnly={!selectedProductIds.some(product => product.idProduct === item.idProduct)}
                                         />
                                     </td>
                                     {item.value ? (

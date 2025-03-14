@@ -4,7 +4,6 @@ import addressReducer from "./addressReducer";
 import categoryReducer from "./categoryReducer";
 import voucherReducer from "./voucherReducer";
 import productReducer from "./productReducer";
-import productDetailReducer from "./productDetailReducer";
 import productFavoriteReducer from "./productFavoriteReducer";
 import promotionReducer from "./promotionReducer";
 import billReducer from "./billReducer";
@@ -20,7 +19,6 @@ const rootReducer = combineReducers({
   category: categoryReducer,
   voucher: voucherReducer,
   product: productReducer,
-  productDetail: productDetailReducer,
   productFavorite: productFavoriteReducer,
   promotion: promotionReducer,
   bill: billReducer,
